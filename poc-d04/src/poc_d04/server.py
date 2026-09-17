@@ -53,12 +53,12 @@ body{
   padding:5px 10px; border-radius:999px; background:rgba(255,255,255,.12);
   border:1px solid rgba(255,255,255,.22);
 }
-.hero h1{margin:0;font-size:clamp(22px,3vw,30px);line-height:1.25;font-weight:700;letter-spacing:-.02em}
-.hero .lede{margin:0;max-width:52ch;color:rgba(246,243,236,.88);font-size:15px;line-height:1.55}
+.hero h1{margin:0;font-size:clamp(26px,4vw,36px);line-height:1.25;font-weight:700;letter-spacing:-.02em}
+.hero .lede{margin:0;max-width:52ch;color:rgba(246,243,236,.88);font-size:17px;line-height:1.55}
 .criterion{
   display:inline-flex;gap:8px;align-items:flex-start;margin-top:4px;
-  padding:10px 12px;border-radius:8px;background:rgba(0,0,0,.18);
-  font-size:13px;line-height:1.45;
+  padding:12px 14px;border-radius:8px;background:rgba(0,0,0,.18);
+  font-size:15px;line-height:1.45;
 }
 .criterion strong{color:#ffd79a}
 .toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:18px 0 8px}
@@ -89,8 +89,8 @@ textarea{
 }
 button,.btn{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  padding:11px 18px; border:0; border-radius:9px; cursor:pointer;
-  background:var(--brand); color:#f7f4ee; font-weight:600; font-size:14px;
+  padding:13px 20px; border:0; border-radius:9px; cursor:pointer;
+  background:var(--brand); color:#f7f4ee; font-weight:600; font-size:16px;
   text-decoration:none; box-shadow:0 1px 0 rgba(255,255,255,.15) inset;
 }
 button:hover,.btn:hover{background:var(--brand-2)}
@@ -98,11 +98,11 @@ a.linkish{color:var(--brand-2);font-weight:500;font-size:14px;margin-left:4px}
 .results{margin-top:28px}
 .results h2{margin:22px 0 10px;font-size:16px;font-weight:600}
 .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow)}
-table{border-collapse:collapse;width:100%;font-size:13px;min-width:920px}
-th,td{border-bottom:1px solid #e6e1d7;padding:9px 10px;vertical-align:top;text-align:left}
+table{border-collapse:collapse;width:100%;font-size:15px;min-width:920px}
+th,td{border-bottom:1px solid #e6e1d7;padding:11px 12px;vertical-align:top;text-align:left}
 th{
   position:sticky;top:0;z-index:1; background:#eef3f3; color:var(--brand);
-  font-weight:600; font-size:12px; letter-spacing:.02em;
+  font-weight:600; font-size:13px; letter-spacing:.02em;
 }
 th.human-h,td.human{
   background:var(--human); color:var(--human-ink); font-weight:600;
@@ -130,8 +130,8 @@ code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.92em}
   display:flex;flex-direction:column;gap:2px;min-width:120px;
   padding:8px 12px;border-radius:9px;background:#f0eeea;border:1px solid var(--line);
 }
-.chip .k{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600}
-.chip .v{font-size:14px;font-weight:600;color:var(--ink)}
+.chip .k{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.chip .v{font-size:16px;font-weight:600;color:var(--ink)}
 .chip.good{background:var(--ok-bg);border-color:#b7d7c5}
 .chip.bad{background:var(--bad-bg);border-color:#e2b4b4}
 .chip.hot{background:#fff1df;border-color:#e7c48a}
@@ -152,8 +152,8 @@ a.jump{margin-left:auto;font-size:13px;color:var(--brand-2);font-weight:600}
 /* 단계 진행 UI */
 .stepper{display:flex;flex-wrap:wrap;gap:6px;margin:18px 0 14px;padding:0;list-style:none}
 .stepper li{
-  display:flex;align-items:center;gap:8px;padding:7px 14px 7px 9px;border-radius:999px;
-  border:1px solid var(--line);background:#fff;font-size:13px;font-weight:600;color:var(--muted);
+  display:flex;align-items:center;gap:8px;padding:8px 16px 8px 10px;border-radius:999px;
+  border:1px solid var(--line);background:#fff;font-size:14px;font-weight:600;color:var(--muted);
   cursor:pointer;user-select:none;transition:background .15s,color .15s;
 }
 .stepper li .n{
@@ -169,7 +169,7 @@ a.jump{margin-left:auto;font-size:13px;color:var(--brand-2);font-weight:600}
 .step[hidden]{display:none}
 .step-title{display:flex;align-items:baseline;gap:10px;margin:0 0 6px}
 .step-title .k{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--accent);font-weight:600;letter-spacing:.06em}
-.step-title h2{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
+.step-title h2{margin:0;font-size:20px;font-weight:700;letter-spacing:-.01em}
 .step-desc{margin:0 0 14px;color:var(--muted);font-size:13.5px;line-height:1.5}
 .step .results-h{margin-top:16px}
 .step-nav{
