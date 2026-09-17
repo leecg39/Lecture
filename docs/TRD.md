@@ -173,15 +173,22 @@ python -m poc_d04 examples                # examples/ 실패장면·오프라인
 python -m poc_d04 all                     # 위 전부(rule 백엔드)
 ```
 
-## 6. 테스트 전략 (`tests/`)
+## 6. 테스트 전략 (`tests/`, 42개)
 
-- `test_data_gen.py`: 30건·유형 6건씩·정답표 오프셋이 원문과 일치·스캔 손상 항목의 정답이 `모호`
-- `test_extract_rule.py`: 시연 사례 → item_id/qty/unit 충족, need_date/delivery_location 확인필요; 별칭만 있는 건에서 후보 병합 금지; 손상 토큰 → null + 메모
-- `test_rules.py`: 표 3.2의 각 셀 최소 1케이스
-- `test_gate.py`: G1–G5 각 위반 1케이스, 정상 결과 0건
-- `test_evaluate.py`: 규칙 백엔드 전 표본 지표가 목표(탐지율 ≥95%, 오탐 ≤10%, 중요오류 0, 추적율 100%) 충족; 손수 만든 pred로 공식 검증
-- `test_paste.py`: 오프셋 없는 ChatGPT형 JSON 로딩 → 오프셋 복원, 미발견 시 G1 위반
-- `test_workbook.py`: 시트 5개 존재, 헤더 검증
+- `test_data_gen.py`: 30건·유형 6건씩·정답표 오프셋이 원문과 일치·스캔 손상 항목의 정답이 `모호`·시연 사례가 기획안 §4-6과 일치
+- `test_extract_rules.py`: 시연 사례 → item_id/qty/unit 충족, need_date/delivery_location 확인필요; 별칭 병합 금지; 손상 토큰은 보이는 대로 + 판독 메모; 표 3.2 각 셀; 붙여넣기 로더 오프셋 복원·한글/영문 키
+- `test_gate_evaluate.py`: 규칙 백엔드 전 표본 게이트 위반 0건; G1–G5 각 위반 1케이스; 지표 목표 충족; 손수 만든 pred로 공식 검증; 리포트 파일 생성
+- `test_workbook_examples.py`: xlsx 시트 12개, 사람 확정 열 공란, 검증지표표 실측 반영; 실패 장면 예시가 G1·G2·G4·G5를 모두 담음; 오프라인 캡처 7건
+- `test_adversarial.py`: `docs/REVIEW_01.md` 공격 시나리오 A–M의 회귀 테스트
+
+### 6.1 붙여넣기 로더 허용 범위 (TRD §2.5 보강)
+
+- 항목 식별: 영문 `항목ID`(`item_id` …) 또는 한글 항목명(`품목 ID`, `배송위치` …) 모두 허용
+- 키 별칭: `field/value/quote/excerpt/candidate/basis/note`, 키의 공백 무시
+- 값 정규화: JSON 숫자 → 문자열, `""/null/없음/N/A/-` → None. 수량 칸에 단위가 붙어 있고 단위 칸이 비어 있으면 둘로 분리(둘 다 원문 토큰)
+- 위치 복원: `원문발췌` → `원문값` 순으로 **독립 토큰 우선** 탐색(`find_standalone`). 실패 시 None → G1
+- 입력 형태: `{"항목":[…]}`, 리스트, `{항목명: {...}}` 딕셔너리, ```` ```json ```` 코드블록·설명 문장 포함 문자열
+- 진단: `경고` 목록(중복 항목, 분리, 값 없음). 값을 고치지는 않는다
 
 ## 7. 저장소 구조
 

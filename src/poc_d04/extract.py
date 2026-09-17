@@ -241,6 +241,20 @@ def _same_class(a: str, b: str) -> bool:
     return "가" <= a <= "힣" and "가" <= b <= "힣"
 
 
+def strip_code_fence(s: str) -> str:
+    """ChatGPT가 ```json ... ``` 으로 감싼 출력, 앞뒤 설명 문장을 벗겨 JSON 본문만 남긴다."""
+    s = s.strip()
+    m = re.search(r"```(?:json|JSON)?\s*(.*?)```", s, re.DOTALL)
+    if m:
+        return m.group(1).strip()
+    # 코드블록이 없으면 첫 '{' 또는 '['부터 마지막 '}' 또는 ']'까지
+    starts = [i for i in (s.find("{"), s.find("[")) if i >= 0]
+    ends = [i for i in (s.rfind("}"), s.rfind("]")) if i >= 0]
+    if starts and ends and min(starts) < max(ends):
+        return s[min(starts):max(ends) + 1]
+    return s
+
+
 def _norm_key(k: str) -> str:
     k = str(k).replace(" ", "")
     return _KEY_ALIASES.get(k, k)
@@ -255,6 +269,7 @@ def load_pasted(obj: dict | list | str, text: str, doc_id: str | None = None) ->
     - 정규화 과정에서 생긴 주의 사항은 '경고' 목록에 남긴다(값을 고치지는 않는다).
     """
     if isinstance(obj, str):
+        obj = strip_code_fence(obj)
         try:
             obj = json.loads(obj)
         except json.JSONDecodeError as e:

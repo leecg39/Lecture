@@ -13,7 +13,9 @@ def test_workbook_sheets_and_human_column(tmp_path):
     p = build_workbook(tmp_path / "out" / "wb.xlsx", data, tmp_path / "out")
     wb = load_workbook(p)
     assert {"안내", "누락표시표", "역할표", "PoC기획안_8칸", "5항목평가표", "시간기록지", "검증지표표",
-            "필수항목표", "용어사전", "표본목록"} <= set(wb.sheetnames)
+            "후보B_견적비교준비", "후보C_발주입고_공동조회", "필수항목표", "용어사전", "표본목록"} <= set(wb.sheetnames)
+    assert wb["후보B_견적비교준비"].max_row >= 7 and wb["후보C_발주입고_공동조회"].max_row >= 6
+    assert (data / "D04_가상견적서_후보B.csv").exists() and (data / "D04_발주입고_후보C.csv").exists()
     ws = wb["누락표시표"]
     headers = [c.value for c in ws[1]]
     assert "사람 확정" in headers and "원문 값" in headers

@@ -11,7 +11,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
 
 from .catalog import LEXICON, REQUIRED_FIELDS
-from .data_gen import load_dataset
+from .data_gen import ORDERS_C, QUOTES_B, load_dataset
 from .pipeline import run_doc
 
 HEAD = PatternFill("solid", fgColor="DDEBF7")
@@ -214,6 +214,43 @@ def _ref_sheets(wb, data_dir: Path, dataset):
                 c.alignment = WRAP
 
 
+def _candidate_b_sheet(wb):
+    """후보 B 견적 비교 준비 — 조건을 나란히 놓고 '비교 불가'를 표시한다. 최저가 자동 선정은 하지 않는다."""
+    headers = ["업체", "품목ID", "표기 품명", "단가(원)", "단가 단위", "포장 단위", "배송비 조건", "납기",
+               "표준 단위(사전)", "단위 일치?", "비교 가능?", "확인 필요 사항", "사람 확정", "비고(교육용 함정 설명)"]
+    ws = _sheet(wb, "후보B_견적비교준비", headers, [10, 8, 18, 10, 9, 12, 18, 12, 10, 10, 10, 30, 18, 34])
+    dv = DataValidation(type="list", formula1='"예,아니오,확인 필요"', allow_blank=True)
+    ws.add_data_validation(dv)
+    for i, q in enumerate(QUOTES_B, start=2):
+        ws.append(q[:8] + [f'=IFERROR(VLOOKUP(B{i},용어사전!$A:$D,4,FALSE),"")',
+                           f'=IF(OR(E{i}="",I{i}=""),"",IF(OR(E{i}=I{i},AND(E{i}="EA",I{i}="개")),"예","아니오"))',
+                           "", "", "", q[8]])
+        dv.add(f"K{i}")
+        ws.cell(row=i, column=13).fill = HUMAN
+    ws.append([])
+    ws.append(["안내: 단가 단위가 표준 단위와 다르면(예: m ↔ 본) 환산 근거 없이는 '비교 불가'로 둔다. 배송비·규격 미기재도 비교 불가. 최저가는 사람이 조건을 확정한 뒤에만 본다."])
+    for row in ws.iter_rows(min_row=2):
+        for c in row:
+            c.alignment = WRAP
+
+
+def _candidate_c_sheet(wb):
+    """후보 C 발주·입고 공동 조회 — 두 부서가 같은 표를 보며 잔량·갱신 상태를 확인한다."""
+    headers = ["발주번호", "품목ID", "품명", "현장", "발주수량", "단위", "입고1(일자/수량)", "입고2", "입고3",
+               "입고 누계(사람 기입)", "잔량", "갱신일", "갱신자", "갱신 상태", "확인 필요 사항", "사람 확정", "비고(교육용 함정 설명)"]
+    ws = _sheet(wb, "후보C_발주입고_공동조회", headers, [13, 8, 18, 8, 9, 6, 14, 14, 14, 12, 8, 11, 8, 12, 30, 18, 40])
+    for i, o in enumerate(ORDERS_C, start=2):
+        ws.append(o[:9] + ["", f'=IF(J{i}="","",E{i}-J{i})', o[9], o[10],
+                           f'=IF(L{i}="","갱신 누락",IF(M{i}="","갱신자 없음","기록 있음"))', "", "", o[11]])
+        ws.cell(row=i, column=10).fill = HUMAN
+        ws.cell(row=i, column=16).fill = HUMAN
+    ws.append([])
+    ws.append(["안내: 입고 누계는 입고 칸을 보고 사람이 적는다(자동 합산하지 않는 이유: 분할 입고 표기가 제각각이라 원문 확인이 먼저). 공동 화면 효과(전화·메신저 확인 감소)를 먼저 기록하고, AI 추가 효과는 분리해 확인한다(기획안 §3-2 게이트)."])
+    for row in ws.iter_rows(min_row=2):
+        for c in row:
+            c.alignment = WRAP
+
+
 def build_workbook(path: Path, data_dir: Path, out_dir: Path, sample_ids=("D04-13",)) -> Path:
     dataset = load_dataset(data_dir)
     wb = Workbook()
@@ -224,6 +261,8 @@ def build_workbook(path: Path, data_dir: Path, out_dir: Path, sample_ids=("D04-1
     _score_sheet(wb)
     _time_sheet(wb)
     _metrics_sheet(wb, out_dir)
+    _candidate_b_sheet(wb)
+    _candidate_c_sheet(wb)
     _ref_sheets(wb, data_dir, dataset)
     path.parent.mkdir(parents=True, exist_ok=True)
     wb.save(path)

@@ -32,12 +32,12 @@ def cmd_check_paste(a):
     else:
         ds = load_dataset(DATA)
         text, doc_id = ds["문서"][a.doc]["원문"], a.doc
+    pasted = Path(a.json).read_text(encoding="utf-8")  # 문자열 그대로 → 로더가 코드블록·설명 문장을 벗긴다
     try:
-        pasted = json.loads(Path(a.json).read_text(encoding="utf-8"))
-    except json.JSONDecodeError as e:
-        print(f"JSON을 읽을 수 없습니다: {e.msg} (줄 {e.lineno}, 열 {e.colno}). ChatGPT 출력에서 코드 블록 기호(```)와 설명 문장을 지우고 다시 저장하세요.", file=sys.stderr)
+        r = run_doc(text, doc_id, "paste", pasted)
+    except ValueError as e:
+        print(f"{e}. ChatGPT 출력에서 JSON 부분만 남겨 다시 저장하세요.", file=sys.stderr)
         return 3
-    r = run_doc(text, doc_id, "paste", pasted)
     print(render_table(r))
     for w in r["추출"].get("경고", []):
         print(f"경고: {w}")

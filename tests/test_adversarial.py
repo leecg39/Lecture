@@ -87,6 +87,13 @@ def test_J_invalid_json_gives_readable_error():
         load_pasted("{not json", DEMO)
 
 
+def test_M_code_fence_and_prose_are_stripped():
+    body = '{"항목":[{"항목ID":"수량","원문값":"20"}]}'
+    for wrapped in (f"```json\n{body}\n```", f"다음은 결과입니다.\n```\n{body}\n```\n확인 바랍니다.", f"결과: {body} 끝."):
+        ex = load_pasted(wrapped, DEMO)
+        assert next(i for i in ex["항목"] if i["항목ID"] == "qty")["원문값"] == "20"
+
+
 def test_K_duplicate_field_warns():
     ex = load_pasted({"항목": [{"항목ID": "수량", "원문값": "20"}, {"항목ID": "수량", "원문값": "20"}]}, DEMO)
     assert any("중복" in w for w in ex["경고"])
