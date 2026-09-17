@@ -43,10 +43,18 @@ def _get(extraction: dict, field: str) -> dict:
     return {"항목ID": field, "원문값": None, "메모": None, "표준명후보": None, "후보품목": []}
 
 
+def _as_id(val) -> str | None:
+    """'p-01', 'P–01'(전각 대시) 같은 표기를 사전 키로 정규화. ID 형식이 아니면 None."""
+    if val is None:
+        return None
+    v = str(val).strip().upper().replace("–", "-").replace("—", "-")
+    return v if _ID.match(v) else None
+
+
 def _candidates(item: dict):
     lex = items_by_id()
-    val = item.get("원문값")
-    if val and _ID.match(val) and val in lex:
+    val = _as_id(item.get("원문값"))
+    if val and val in lex:
         return [lex[val]]
     ids = item.get("후보품목") or []
     if not ids and item.get("표준명후보"):
@@ -63,7 +71,8 @@ def check(extraction: dict, text: str, base_date: str = BASE_DATE) -> dict:
     out: list[dict] = []
     item = _get(extraction, "item_id")
     cands = _candidates(item)
-    explicit = bool(item.get("원문값") and _ID.match(item["원문값"]) and item["원문값"] in lex)
+    vid = _as_id(item.get("원문값"))
+    explicit = bool(vid and vid in lex)
 
     def push(field: str, status: str, basis: str, src: dict, cand: str | None = None) -> None:
         s, e = src.get("원문시작"), src.get("원문끝")
@@ -87,9 +96,9 @@ def check(extraction: dict, text: str, base_date: str = BASE_DATE) -> dict:
         push("item_id", "누락", "품목 ID·품명 모두 없음", item)
     elif _unreadable(item):
         push("item_id", "모호", "글자 판독 불가 — 원문 재확인", item)
-    elif _ID.match(v):
-        if v in lex:
-            push("item_id", "충족", f"사전 품목 {lex[v].display}", item, lex[v].display)
+    elif vid:
+        if vid in lex:
+            push("item_id", "충족", f"사전 품목 {lex[vid].display}", item, lex[vid].display)
         else:
             push("item_id", "불일치", "사전에 없는 품목 ID", item)
     else:
@@ -165,13 +174,13 @@ def check(extraction: dict, text: str, base_date: str = BASE_DATE) -> dict:
     if sv is not None:
         if _unreadable(sp):
             push("spec", "모호", "글자 판독 불가 — 원문 재확인", sp)
-        elif explicit and lex[v].spec != sv:
-            push("spec", "불일치", f"품목 ID 사전 규격 '{lex[v].spec}'과 다름", sp, lex[v].spec)
+        elif explicit and lex[vid].spec != sv:
+            push("spec", "불일치", f"품목 ID 사전 규격 '{lex[vid].spec}'과 다름", sp, lex[vid].spec)
         else:
             push("spec", "충족", "규격 원문 존재", sp)
     else:
         if explicit:
-            push("spec", "충족", f"품목 ID 확정 → 사전 규격 '{lex[v].spec}' 적용(원문값 없음)", sp, lex[v].spec)
+            push("spec", "충족", f"품목 ID 확정 → 사전 규격 '{lex[vid].spec}' 적용(원문값 없음)", sp, lex[vid].spec)
         else:
             push("spec", "누락", "규격 없음(품목 ID 미확정)", sp)
 

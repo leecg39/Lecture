@@ -16,6 +16,7 @@ from .rules import parse_date
 
 _DATE_LIKE = re.compile(r"\d{4}-\d{2}-\d{2}|\d{1,2}월\s?\d{1,2}일|\b\d{1,2}[/.]\d{1,2}\b")
 _ID = re.compile(r"P-\d{2}")
+_SPEC_TOKEN = re.compile(r"\b\d{2,3}A\b|\b\d{1,2}mm\b")
 
 GATE_TEXT = {
     "G1": "값이 없으면 비우거나 '확인 필요'. 원문 없는 값을 채우지 않는다.",
@@ -67,11 +68,16 @@ def audit(extraction: dict, text: str) -> list[dict]:
                 viol.append(_v("G1", f, f"원문 위치 [{s}:{e}]='{text[s:e]}' ≠ 값 '{val}'"))
 
         # G3: 별칭 병합
-        if f == "item_id" and val is not None and not _ID.fullmatch(str(val)):
+        if f == "item_id" and val is not None and not _ID.fullmatch(str(val).upper()):
             alias_cands = [x for x in LEXICON if str(val) in x.aliases or str(val) == x.name]
-            single = set(_ID.findall(str(it.get("표준명후보") or "")))
-            if len(alias_cands) > 1 and len(single) == 1 and not spec_in_text:
-                viol.append(_v("G3", f, f"별칭 '{val}'은 {len(alias_cands)}개 품목에 해당하나 규격 없이 {single.pop()}로 확정"))
+            cand_txt = str(it.get("표준명후보") or "")
+            single = set(_ID.findall(cand_txt))
+            cand_specs = {s for s in _SPEC_TOKEN.findall(cand_txt) if s not in text}
+            if len(alias_cands) > 1 and not spec_in_text:
+                if len(single) == 1:
+                    viol.append(_v("G3", f, f"별칭 '{val}'은 {len(alias_cands)}개 품목에 해당하나 규격 없이 {single.pop()}로 확정"))
+                elif len(cand_specs) == 1 and len({x.spec for x in alias_cands}) > 1:
+                    viol.append(_v("G3", f, f"별칭 '{val}'의 후보에 원문에 없는 규격 '{cand_specs.pop()}'을 붙여 한 품목으로 좁힘"))
 
         # G5: 사람 확정 칸 선점
         if it.get("사람확정") not in (None, ""):

@@ -66,7 +66,7 @@ def render_table(result: dict) -> str:
     names = [r["항목명"] for r in res["항목"] if r["확인필요"]]
     lines += ["", f"확인 필요 항목: {', '.join(names) or '없음'}"]
     if result["게이트위반"]:
-        lines += ["", "게이트 위반:"] + [f"- {v['코드']} {v['항목ID']}: {v['설명']}" for v in result["게이트위반"]]
+        lines += ["", "게이트 위반:"] + [f"- {v['코드']} {v['항목ID'] or '(문서)'}: {v['설명']}" for v in result["게이트위반"]]
     else:
         lines += ["", "게이트 위반: 없음"]
     return "\n".join(lines) + "\n"

@@ -32,9 +32,15 @@ def cmd_check_paste(a):
     else:
         ds = load_dataset(DATA)
         text, doc_id = ds["문서"][a.doc]["원문"], a.doc
-    pasted = json.loads(Path(a.json).read_text(encoding="utf-8"))
+    try:
+        pasted = json.loads(Path(a.json).read_text(encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        print(f"JSON을 읽을 수 없습니다: {e.msg} (줄 {e.lineno}, 열 {e.colno}). ChatGPT 출력에서 코드 블록 기호(```)와 설명 문장을 지우고 다시 저장하세요.", file=sys.stderr)
+        return 3
     r = run_doc(text, doc_id, "paste", pasted)
     print(render_table(r))
+    for w in r["추출"].get("경고", []):
+        print(f"경고: {w}")
     if a.truth and not a.text:
         from .evaluate import score
         ds = load_dataset(DATA)

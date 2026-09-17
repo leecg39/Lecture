@@ -181,7 +181,16 @@ def extract_rule(text: str, doc_id: str | None = None) -> dict:
         else:
             items["unit"] = _item("unit", memo="단위 토큰 없음")
 
-    return {"문서ID": doc_id, "백엔드": "rule", "항목": [items[f] for f in FIELD_ORDER]}
+    # 6) 복수 품목 의심: 남은 영역에 품목 ID·수량+단위가 더 있으면 사람 확인 메모
+    extra_ids = [m.group(0) for m in ID_RE.finditer(text) if mask.free(m.start(), m.end())]
+    extra_qty = [m.group(0) for m in QTY_UNIT_RE.finditer(text) if mask.free(m.start(), m.end())]
+    warnings: list[str] = []
+    if extra_ids or extra_qty:
+        note = f"복수 품목 의심(추가 토큰: {', '.join(extra_ids + extra_qty)}) — 이 PoC는 요청서당 1품목 기준, 사람 확인"
+        items["item_id"]["메모"] = (items["item_id"]["메모"] + " · " if items["item_id"]["메모"] else "") + note
+        warnings.append(note)
+
+    return {"문서ID": doc_id, "백엔드": "rule", "항목": [items[f] for f in FIELD_ORDER], "경고": warnings}
 
 
 # ---------------------------------------------------------------- 붙여넣기 로더
@@ -196,50 +205,122 @@ _NAME_TO_ID.update({"품목ID": "item_id", "품목": "item_id", "수량": "qty",
                     "배송위치": "delivery_location", "배송지": "delivery_location", "규격": "spec"})
 
 
+_NULLS = ("", "null", "None", "없음", "N/A", "n/a", "-", "—")
+_QTY_UNIT_SPLIT = re.compile(rf"^([0-9][0-9,]*)\s*({UNIT_TOKENS})$")
+
+
+def find_standalone(text: str, value: str) -> int:
+    """value의 위치 중 앞뒤가 숫자·영문·한글이 아닌(독립 토큰) 첫 위치. 없으면 첫 위치, 없으면 -1.
+
+    예: '2026-09-20까지 P-01 20개'에서 '20'은 날짜 안의 '20'이 아니라 수량 '20'을 가리켜야 한다.
+    """
+    if not value:
+        return -1
+    first, start = -1, 0
+    while True:
+        idx = text.find(value, start)
+        if idx < 0:
+            return first
+        if first < 0:
+            first = idx
+        before = text[idx - 1] if idx > 0 else " "
+        after = text[idx + len(value)] if idx + len(value) < len(text) else " "
+        glued_before = _same_class(before, value[0]) or (before == "-" and value[0].isdigit())
+        glued_after = _same_class(after, value[-1]) or (after == "-" and value[-1].isdigit())
+        if not glued_before and not glued_after:
+            return idx
+        start = idx + 1
+
+
+def _same_class(a: str, b: str) -> bool:
+    """같은 글자 부류(숫자↔숫자, 한글↔한글, 영문↔영문)면 한 토큰의 일부로 본다. '20개'의 20과 개는 다른 부류."""
+    if a.isdigit() and b.isdigit():
+        return True
+    if a.isascii() and a.isalpha() and b.isascii() and b.isalpha():
+        return True
+    return "가" <= a <= "힣" and "가" <= b <= "힣"
+
+
+def _norm_key(k: str) -> str:
+    k = str(k).replace(" ", "")
+    return _KEY_ALIASES.get(k, k)
+
+
 def load_pasted(obj: dict | list | str, text: str, doc_id: str | None = None) -> dict:
     """ChatGPT가 낸 JSON(오프셋 없이 원문발췌만 있을 수 있음)을 표준 스키마로 정규화한다.
 
-    - 원문시작/끝이 없으면 원문발췌(또는 원문값)를 text.find로 복원. 못 찾으면 None → 게이트 G1.
-    - 항목ID 대신 항목명(한글)을 써도 받아준다.
+    - 원문시작/끝이 없으면 원문발췌(또는 원문값)를 독립 토큰 우선으로 찾아 복원. 못 찾으면 None → 게이트 G1.
+    - 항목ID 대신 항목명(한글)·영문 키를 써도 받아준다. 값이 숫자형이면 문자열로 바꾼다.
+    - 수량 칸에 '20개'처럼 단위가 붙어 오면 단위 칸이 비어 있을 때만 둘로 나눈다(둘 다 원문 토큰).
+    - 정규화 과정에서 생긴 주의 사항은 '경고' 목록에 남긴다(값을 고치지는 않는다).
     """
     if isinstance(obj, str):
-        obj = json.loads(obj)
+        try:
+            obj = json.loads(obj)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"붙여넣은 내용이 JSON이 아닙니다: {e.msg} (줄 {e.lineno})") from e
     raw_items = obj["항목"] if isinstance(obj, dict) and "항목" in obj else obj
     if isinstance(raw_items, dict):  # {"품목 ID": {...}, ...} 형태
-        raw_items = [{"항목ID": k, **(v if isinstance(v, dict) else {"원문값": v})} for k, v in raw_items.items()]
+        raw_items = [{"항목ID": k, **(v if isinstance(v, dict) else {"원문값": v})}
+                     for k, v in raw_items.items() if k not in ("문서ID", "사람확정", "확정")]
+    if not isinstance(raw_items, list):
+        raw_items = []
     by_field: dict[str, dict] = {}
     extra: dict = {}
+    warnings: list[str] = []
     for r in raw_items:
-        r = {_KEY_ALIASES.get(k, k): v for k, v in r.items()}
+        if not isinstance(r, dict):
+            continue
+        r = {_norm_key(k): v for k, v in r.items()}
         fid = r.get("항목ID")
         fid = _NAME_TO_ID.get(str(fid).replace(" ", ""), _NAME_TO_ID.get(fid, fid))
         if fid not in FIELD_ORDER:
             continue
+        if fid in by_field:
+            warnings.append(f"{FIELD_NAMES[fid]} 항목이 중복 출력됨 — 뒤의 값 사용")
         value = r.get("원문값")
-        if value in ("", "null", "없음", "N/A", "-"):
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            value = str(int(value)) if float(value).is_integer() else str(value)
+        if value is not None and str(value).strip() in _NULLS:
             value = None
+        if value is not None:
+            value = str(value)
         s, e = r.get("원문시작"), r.get("원문끝")
-        if value is not None and (s is None or e is None or text[s:e] != value):
+        if value is not None and (not isinstance(s, int) or not isinstance(e, int) or text[s:e] != value):
             probe = r.get("원문발췌") or value
-            idx = text.find(str(probe))
+            idx = find_standalone(text, str(probe))
             if idx >= 0 and text[idx:idx + len(str(probe))] == value:
                 s, e = idx, idx + len(str(probe))
             else:
-                idx = text.find(str(value))
-                s, e = (idx, idx + len(str(value))) if idx >= 0 else (None, None)
+                idx = find_standalone(text, value)
+                s, e = (idx, idx + len(value)) if idx >= 0 else (None, None)
         item = _item(fid, value, (s, e) if s is not None else None, r.get("표준명후보"), r.get("표준명근거"), r.get("메모"))
-        for k in ("사람확정", "확정", "최종"):
+        for k in ("사람확정", "확정", "최종", "최종확정"):
             if r.get(k) not in (None, ""):
                 item["사람확정"] = r[k]
         by_field[fid] = item
+
+    # 수량 칸에 단위가 붙어 온 경우: 단위 칸이 비어 있으면 둘로 나눈다(둘 다 원문 토큰이므로 추적 가능)
+    q = by_field.get("qty")
+    if q and q["원문값"] and q["원문시작"] is not None:
+        m = _QTY_UNIT_SPLIT.match(q["원문값"])
+        if m and (by_field.get("unit") is None or by_field["unit"]["원문값"] is None):
+            base = q["원문시작"]
+            by_field["qty"] = _item("qty", m.group(1), (base, base + len(m.group(1))), None, None, q["메모"])
+            us = base + m.start(2)
+            by_field["unit"] = _item("unit", m.group(2), (us, us + len(m.group(2))), None, None, "수량 칸에서 분리")
+            warnings.append(f"수량 '{m.group(0)}'을 수량 '{m.group(1)}'과 단위 '{m.group(2)}'로 분리")
+
     for f in FIELD_ORDER:
         by_field.setdefault(f, _item(f))
+    if not raw_items or all(by_field[f]["원문값"] is None for f in FIELD_ORDER):
+        warnings.append("추출된 값이 하나도 없음 — 출력 형식 또는 원문 입력을 확인")
     if isinstance(obj, dict):
-        for k in ("사람확정", "확정"):
+        for k in ("사람확정", "확정", "사람 확정", "최종확정"):
             if obj.get(k) not in (None, ""):
                 extra["사람확정"] = obj[k]
     return {"문서ID": doc_id or (obj.get("문서ID") if isinstance(obj, dict) else None),
-            "백엔드": "paste", "항목": [by_field[f] for f in FIELD_ORDER], **extra}
+            "백엔드": "paste", "항목": [by_field[f] for f in FIELD_ORDER], "경고": warnings, **extra}
 
 
 # ---------------------------------------------------------------- 생성형 AI 백엔드 (가정)
