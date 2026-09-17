@@ -183,8 +183,8 @@ a.jump{margin-left:auto;font-size:13px;color:var(--brand-2);font-weight:600}
   margin-top:22px;padding-top:14px;border-top:1px solid var(--line);
 }
 .step-nav[hidden]{display:none}
-button.ghost{background:transparent;color:var(--brand);border:1px solid var(--line);box-shadow:none}
-button.ghost:hover{background:#fff}
+button.ghost,a.btn.ghost{background:transparent;color:var(--brand);border:1px solid var(--line);box-shadow:none}
+button.ghost:hover,a.btn.ghost:hover{background:#fff}
 button:disabled,button:disabled:hover{opacity:.4;cursor:not-allowed;background:var(--brand)}
 button.ghost:disabled,button.ghost:disabled:hover{background:transparent}
 .kbd-hint{color:var(--muted);font-size:12px}
@@ -232,7 +232,7 @@ PAGE = """<!doctype html><html lang="ko"><head>
       </div>
       <div class="toolbar">
         <button type="submit">실행 → 단계별로 보기</button>
-        <a class="linkish" href="/bad">실패 장면 불러오기 (잘못된 초안)</a>
+        <a class="btn ghost" href="/bad">실패 장면 불러오기</a>
       </div>
     </form>
     {notice}
