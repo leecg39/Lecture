@@ -1,6 +1,7 @@
 """시연용 로컬 웹 데모 (표준 라이브러리 http.server, 외부 의존성 없음).
 
-요청서 원문을 붙이면 추출 → 규칙 판정 → 게이트 감사 → 보완 질문을 표로 보여 준다.
+요청서 원문을 붙이면 추출 → 규칙 판정 → 게이트 감사 → 보완 질문을 단계별 화면으로 보여 준다
+(한 번에 계산하고, 화면에서는 한 단계씩 넘겨 본다).
 ChatGPT 출력 JSON을 함께 붙이면 그 출력을 검사한다(붙여넣기 경로). 사람 확정 칸은 항상 비어 있다.
 교육용 로컬 데모이며 운영 서버가 아니다. 기본으로 127.0.0.1에만 바인딩한다.
 """
@@ -148,6 +149,40 @@ code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.92em}
 .json-box summary{cursor:pointer;font-weight:600;color:var(--brand)}
 .json-box pre{margin:10px 0 4px}
 a.jump{margin-left:auto;font-size:13px;color:var(--brand-2);font-weight:600}
+/* 단계 진행 UI */
+.stepper{display:flex;flex-wrap:wrap;gap:6px;margin:18px 0 14px;padding:0;list-style:none}
+.stepper li{
+  display:flex;align-items:center;gap:8px;padding:7px 14px 7px 9px;border-radius:999px;
+  border:1px solid var(--line);background:#fff;font-size:13px;font-weight:600;color:var(--muted);
+  cursor:pointer;user-select:none;transition:background .15s,color .15s;
+}
+.stepper li .n{
+  display:inline-flex;width:22px;height:22px;border-radius:50%;align-items:center;justify-content:center;
+  background:#e9e5dc;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--ink);
+}
+.stepper li.active{background:var(--brand);color:#f7f4ee;border-color:var(--brand)}
+.stepper li.active .n{background:rgba(255,255,255,.2);color:#fff}
+.stepper li.done{color:var(--brand);border-color:#b7d7c5}
+.stepper li.done .n{background:var(--ok-bg);color:var(--ok)}
+.stepper li.locked{opacity:.45;cursor:not-allowed}
+.stepper li .arrow{color:var(--line);margin:0 2px;font-size:12px}
+.step[hidden]{display:none}
+.step-title{display:flex;align-items:baseline;gap:10px;margin:0 0 6px}
+.step-title .k{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--accent);font-weight:600;letter-spacing:.06em}
+.step-title h2{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
+.step-desc{margin:0 0 14px;color:var(--muted);font-size:13.5px;line-height:1.5}
+.step .results-h{margin-top:16px}
+.step-nav{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  margin-top:22px;padding-top:14px;border-top:1px solid var(--line);
+}
+.step-nav[hidden]{display:none}
+button.ghost{background:transparent;color:var(--brand);border:1px solid var(--line);box-shadow:none}
+button.ghost:hover{background:#fff}
+button:disabled,button:disabled:hover{opacity:.4;cursor:not-allowed;background:var(--brand)}
+button.ghost:disabled,button.ghost:disabled:hover{background:transparent}
+.kbd-hint{color:var(--muted);font-size:12px}
+.kbd-hint kbd{font-family:'IBM Plex Mono',ui-monospace,monospace;border:1px solid var(--line);border-radius:4px;padding:0 5px;background:#fff}
 """
 
 PAGE = """<!doctype html><html lang="ko"><head>
@@ -166,30 +201,82 @@ PAGE = """<!doctype html><html lang="ko"><head>
     <p class="lede">문서에서 뽑고, 빈칸을 표시하고, 사람이 확정한다. 교육용 가상 자료 · 로컬 시연 데모.</p>
     <div class="criterion">성공 기준: <strong>「문서 생성 성공」이 아니라 「추가 문의 항목을 찾았는가」</strong></div>
   </header>
-  <form method="post" action="/run">
-    <div class="row">
-      <section class="panel">
-        <h2>1. 요청서 원문</h2>
-        <label>표본 불러오기 <select name="doc" onchange="pick(this)">{options}</select></label>
-        <textarea id="text" name="text" rows="8" placeholder="A현장, 품목 P-01 20개, 다음 주 필요.">{text}</textarea>
-      </section>
-      <section class="panel">
-        <h2>2. (선택) ChatGPT 출력 JSON</h2>
-        <span class="hint">비우면 규칙 추출기(오프라인). 붙이면 그 출력을 검사. 코드블록 기호가 섞여도 됩니다.</span>
-        <textarea name="pasted" rows="8" placeholder='{{"항목":[{{"항목ID":"품목 ID","원문값":"P-01","원문발췌":"P-01"}}, ...]}}'>{pasted}</textarea>
-      </section>
-    </div>
-    <div class="toolbar">
-      <button type="submit">추출 → 규칙 검사 → 게이트 감사</button>
-      <a class="linkish" href="/bad">실패 장면 불러오기 (잘못된 초안)</a>
-      <a class="jump" href="#result-anchor">결과로 ↓</a>
-    </div>
-  </form>
-  <div class="results">{result}</div>
+  <ol class="stepper" id="stepper" aria-label="진행 단계">
+    <li data-step="0"><span class="n">1</span>입력</li>
+    <li data-step="1"><span class="n">2</span>추출</li>
+    <li data-step="2"><span class="n">3</span>규칙 검사</li>
+    <li data-step="3"><span class="n">4</span>게이트 감사</li>
+    <li data-step="4"><span class="n">5</span>보완 질문 · 확정</li>
+  </ol>
+  <section class="step" data-step="0">
+    <div class="step-title"><span class="k">STEP 1</span><h2>요청서 입력</h2></div>
+    <p class="step-desc">요청서 원문을 붙이거나 표본을 고른다. ChatGPT 출력 JSON을 함께 붙이면 그 출력을 검사한다.</p>
+    <form method="post" action="/run">
+      <div class="row">
+        <section class="panel">
+          <h2>요청서 원문</h2>
+          <label>표본 불러오기 <select name="doc" onchange="pick(this)">{options}</select></label>
+          <textarea id="text" name="text" rows="8" placeholder="A현장, 품목 P-01 20개, 다음 주 필요.">{text}</textarea>
+        </section>
+        <section class="panel">
+          <h2>(선택) ChatGPT 출력 JSON</h2>
+          <span class="hint">비우면 규칙 추출기(오프라인). 붙이면 그 출력을 검사. 코드블록 기호가 섞여도 됩니다.</span>
+          <textarea name="pasted" rows="8" placeholder='{{"항목":[{{"항목ID":"품목 ID","원문값":"P-01","원문발췌":"P-01"}}, ...]}}'>{pasted}</textarea>
+        </section>
+      </div>
+      <div class="toolbar">
+        <button type="submit">실행 → 단계별로 보기</button>
+        <a class="linkish" href="/bad">실패 장면 불러오기 (잘못된 초안)</a>
+      </div>
+    </form>
+    {notice}
+  </section>
+  {result}
+  <nav class="step-nav" id="stepnav" hidden>
+    <button type="button" class="ghost" id="prev">← 이전</button>
+    <span class="kbd-hint"><span id="stepinfo"></span> · <kbd>←</kbd> <kbd>→</kbd> 키로 이동</span>
+    <button type="button" id="next">다음 →</button>
+  </nav>
 </div>
 <script>
 const S={samples};
 function pick(sel){{ if(S[sel.value]) document.getElementById('text').value=S[sel.value]; }}
+(function(){{
+  const steps=[...document.querySelectorAll('.step')];
+  const items=[...document.querySelectorAll('#stepper li')];
+  const has=steps.length>1, last=steps.length-1;
+  const nav=document.getElementById('stepnav'), prev=document.getElementById('prev'),
+        next=document.getElementById('next'), info=document.getElementById('stepinfo');
+  let cur=has?1:0;
+  const m=location.hash.match(/^#step-([0-9]+)$/);
+  if(m&&+m[1]<=last) cur=+m[1];
+  function go(n,scroll){{
+    cur=n;
+    steps.forEach(s=>{{ s.hidden=(+s.dataset.step!==n); }});
+    items.forEach(li=>{{
+      const k=+li.dataset.step;
+      li.classList.toggle('active',k===n);
+      li.classList.toggle('done',has&&k<n);
+      li.classList.toggle('locked',!has&&k>0);
+      li.setAttribute('aria-current',k===n?'step':'false');
+    }});
+    nav.hidden=!has;
+    prev.disabled=(n===0);
+    next.textContent = n===last ? '처음으로 (입력)' : (n===0 ? '결과 보기 →' : '다음 →');
+    info.textContent=`${{n+1}} / ${{last+1}}`;
+    history.replaceState(null,'','#step-'+n);
+    if(scroll) document.getElementById('stepper').scrollIntoView({{behavior:'smooth',block:'start'}});
+  }}
+  items.forEach(li=>li.addEventListener('click',()=>{{ const k=+li.dataset.step; if(k===0||has) go(k,true); }}));
+  prev.onclick=()=>go(Math.max(0,cur-1),true);
+  next.onclick=()=>go(cur===last?0:cur+1,true);
+  document.addEventListener('keydown',e=>{{
+    if(e.target.matches('textarea,select,input')) return;
+    if(e.key==='ArrowRight'&&has&&cur<last) go(cur+1,true);
+    if(e.key==='ArrowLeft'&&cur>0) go(cur-1,true);
+  }});
+  go(cur,false);
+}})();
 </script>
 </body></html>"""
 
@@ -210,8 +297,19 @@ class Demo:
             sel = " selected" if doc_id == selected else ""
             opts.append(f'<option value="{_e(doc_id)}"{sel}>{_e(doc_id)} · {_e(d["유형"])} · {_e(d["버전"])}</option>')
         samples = {k: v["원문"] for k, v in self.ds["문서"].items()}
-        return PAGE.format(css=CSS, options="".join(opts), text=_e(text), pasted=_e(pasted), result=result,
+        # 단계 섹션이 들어 있으면 결과 단계로, 아니면(오류·빈 입력) 입력 단계 안에 알림으로 표시
+        is_steps = 'class="step"' in result
+        return PAGE.format(css=CSS, options="".join(opts), text=_e(text), pasted=_e(pasted),
+                           result=result if is_steps else "", notice="" if is_steps else result,
                            samples=json.dumps(samples, ensure_ascii=False))
+
+    @staticmethod
+    def _step(n: int, title: str, desc: str, body: list[str]) -> str:
+        return (
+            f'<section class="step" data-step="{n}" hidden>'
+            f'<div class="step-title"><span class="k">STEP {n + 1}</span><h2>{title}</h2></div>'
+            f'<p class="step-desc">{desc}</p>' + "".join(body) + "</section>"
+        )
 
     def run(self, text: str, pasted: str, doc_id: str) -> str:
         text = text.replace("\r\n", "\n")
@@ -222,40 +320,54 @@ class Demo:
             r = run_doc(text, doc_id or None, backend, pasted if backend == "paste" else None)
         except ValueError as ex:
             return f'<div class="gate">{_e(ex)}</div>'
+        ex_items = r["추출"].get("항목", [])
         res, viol, warn = r["판정"], r["게이트위반"], r["추출"].get("경고", [])
         need = [it["항목명"] for it in res["항목"] if it["확인필요"]]
-        out = [
+        found = sum(1 for it in ex_items if it.get("원문값") is not None)
+
+        # ── STEP 2. 추출 ──────────────────────────────────────────────
+        s1 = [
             '<div id="result-anchor" class="summary-strip">',
             f'<div class="chip"><span class="k">백엔드</span><span class="v">{_e(backend)}</span></div>',
-            f'<div class="chip {"bad" if viol else "good"}"><span class="k">게이트</span><span class="v">{len(viol)}건 위반</span></div>',
+            f'<div class="chip"><span class="k">원문에서 찾은 값</span><span class="v">{found} / {len(ex_items)} 항목</span></div>',
+            f'<div class="chip {"hot" if warn else "good"}"><span class="k">경고</span><span class="v">{len(warn)}건</span></div>',
+            "</div>",
+        ]
+        for w in warn:
+            s1.append(f'<div class="warn">경고: {_e(w)}</div>')
+        s1.append(
+            '<div class="table-wrap"><table><tr>'
+            "<th>항목</th><th>원문 값</th><th>원문 위치</th><th>표준명 후보 (AI 제안)</th><th>메모</th></tr>"
+        )
+        for it in ex_items:
+            pos = f'{it["원문시작"]}–{it["원문끝"]}' if it.get("원문시작") is not None else ""
+            s1.append(
+                f'<tr><td>{_e(it["항목명"])}</td>'
+                f'<td>{_e(it["원문값"]) if it.get("원문값") is not None else "<i>(없음)</i>"}</td>'
+                f'<td>{_e(pos)}</td><td>{_e(it.get("표준명후보"))}</td><td>{_e(it.get("메모"))}</td></tr>'
+            )
+        s1.append("</table></div>")
+        s1.append(
+            '<details class="json-box"><summary>추출 JSON</summary><pre>'
+            + _e(json.dumps(r["추출"], ensure_ascii=False, indent=1))
+            + "</pre></details>"
+        )
+
+        # ── STEP 3. 규칙 검사 → 누락 표시표 ──────────────────────────
+        s2 = [
+            '<div class="summary-strip">',
             f'<div class="chip {"hot" if need else "good"}"><span class="k">확인 필요</span><span class="v">{_e(", ".join(need) or "없음")}</span></div>',
             '<div class="chip"><span class="k">사람 확정</span><span class="v">표 마지막 열 · 비움</span></div>',
             "</div>",
-            f'<h2 class="results-h">결과 · 백엔드 <code>{_e(backend)}</code></h2>',
-        ]
-        for w in warn:
-            out.append(f'<div class="warn">경고: {_e(w)}</div>')
-        if viol:
-            out.append('<h2 class="results-h">게이트 위반</h2><div class="gate-list">')
-            for v in viol:
-                out.append(
-                    f'<div class="gate"><span class="gate-code"><b>{_e(v["코드"])}</b></span>'
-                    f'<div><span class="gate-item">{_e(v["항목ID"] or "(문서)")}</span> · {_e(v["설명"])}'
-                    f'<div class="gate-rule">{_e(v["게이트"])}</div></div></div>'
-                )
-            out.append("</div>")
-        else:
-            out.append('<div class="ok">게이트 위반 없음 — 원문 없는 값을 채우지 않았다.</div>')
-        out.append(
-            '<h2 class="results-h">누락 표시표</h2><div class="table-wrap"><table><tr>'
+            '<div class="table-wrap"><table><tr>'
             "<th>항목</th><th>원문 값</th><th>원문 위치</th><th>표준명 후보 (AI 제안)</th>"
             '<th>상태 (규칙)</th><th>근거</th><th>보완 질문 초안 (AI 제안)</th>'
-            '<th class="human-h">사람 확정</th></tr>'
-        )
+            '<th class="human-h">사람 확정</th></tr>',
+        ]
         for it in res["항목"]:
             pos = f'{it["원문시작"]}–{it["원문끝"]}' if it["원문시작"] is not None else ""
             st = ("확인 필요 · " if it["확인필요"] else "") + it["상태"]
-            out.append(
+            s2.append(
                 f'<tr><td>{_e(it["항목명"])}</td>'
                 f'<td>{_e(it["원문값"]) if it["원문값"] is not None else "<i>(없음)</i>"}</td>'
                 f'<td>{_e(pos)}</td><td>{_e(it["표준명후보"])}</td>'
@@ -263,24 +375,48 @@ class Demo:
                 f'<td>{_e(it["근거"])}</td><td>{_e(it["보완질문"])}</td>'
                 '<td class="human"></td></tr>'
             )
-        out.append("</table></div>")
-        out.append(f'<p class="meta"><b>확인 필요 항목:</b> {_e(", ".join(need) or "없음")}</p>')
+        s2.append("</table></div>")
+        s2.append(f'<p class="meta"><b>확인 필요 항목:</b> {_e(", ".join(need) or "없음")}</p>')
+
+        # ── STEP 4. 게이트 감사 ───────────────────────────────────────
+        s3 = [
+            '<div class="summary-strip">',
+            f'<div class="chip {"bad" if viol else "good"}"><span class="k">게이트</span><span class="v">{len(viol)}건 위반</span></div>',
+            "</div>",
+        ]
+        if viol:
+            s3.append('<div class="gate-list">')
+            for v in viol:
+                s3.append(
+                    f'<div class="gate"><span class="gate-code"><b>{_e(v["코드"])}</b></span>'
+                    f'<div><span class="gate-item">{_e(v["항목ID"] or "(문서)")}</span> · {_e(v["설명"])}'
+                    f'<div class="gate-rule">{_e(v["게이트"])}</div></div></div>'
+                )
+            s3.append("</div>")
+        else:
+            s3.append('<div class="ok">게이트 위반 없음 — 원문 없는 값을 채우지 않았다.</div>')
+
+        # ── STEP 5. 보완 질문 · 사람 확정 ────────────────────────────
         qs = res.get("보완질문요약", [])
+        s4 = []
         if qs:
-            out.append(
-                '<h2 class="results-h">보완 질문 초안</h2><ol class="qlist">'
-                + "".join(f"<li>{_e(q)}</li>" for q in qs)
-                + "</ol>"
-            )
+            s4.append('<h2 class="results-h">보완 질문 초안 (AI 제안)</h2><ol class="qlist">'
+                      + "".join(f"<li>{_e(q)}</li>" for q in qs) + "</ol>")
+        else:
+            s4.append('<div class="ok">추가로 물을 항목이 없다.</div>')
+        s4.append(
+            '<div class="warn">사람 확정: 위 질문을 요청자에게 보내 답을 받은 뒤, 누락 표시표의 '
+            "<b>사람 확정</b> 열을 사람이 채운다. AI 제안은 확정이 아니다.</div>"
+        )
         if doc_id and doc_id in self.ds["문서"] and self.ds["문서"][doc_id]["원문"] == text:
             m = score({doc_id: res}, self.ds)["전체"]
-            out.append(f'<h2 class="results-h">정답표 대조 ({_e(doc_id)})</h2>')
-            out.append(
+            s4.append(f'<h2 class="results-h">정답표 대조 ({_e(doc_id)})</h2>')
+            s4.append(
                 f'<p class="meta">탐지 {m["탐지"]}/{m["정답확인필요"]} · 오탐 {m["오탐"]} · '
                 f'중요 오류 {m["중요 오류"]} · 상태 정확도 {m["상태 정확도"]*100:.0f}%</p>'
             )
             if m["미스"]:
-                out.append(
+                s4.append(
                     '<div class="table-wrap"><table><tr><th>항목</th><th>정답</th><th>예측</th><th>정답 사유</th></tr>'
                     + "".join(
                         f"<tr><td>{_e(x['항목'])}</td><td>{_e(x['정답'])}</td>"
@@ -289,12 +425,13 @@ class Demo:
                     )
                     + "</table></div>"
                 )
-        out.append(
-            '<details class="json-box"><summary>추출 JSON</summary><pre>'
-            + _e(json.dumps(r["추출"], ensure_ascii=False, indent=1))
-            + "</pre></details>"
+
+        return (
+            self._step(1, "추출", f"원문에서 값을 뽑는다. 백엔드 <code>{_e(backend)}</code> · 원문에 없는 값은 만들지 않는다.", s1)
+            + self._step(2, "규칙 검사 → 누락 표시표", "뽑은 값에 규칙을 적용해 빈칸·모호 표현을 표시한다. 마지막 열은 사람이 채운다.", s2)
+            + self._step(3, "게이트 감사", "AI가 원문 없는 값을 채웠는지, 사람 확정 칸을 건드렸는지 검사한다.", s3)
+            + self._step(4, "보완 질문 · 사람 확정", "확인이 필요한 항목마다 요청자에게 보낼 질문 초안을 만든다.", s4)
         )
-        return "".join(out)
 
 
 def make_handler(demo: Demo):
