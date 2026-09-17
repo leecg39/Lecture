@@ -241,7 +241,7 @@ PAGE = """<!doctype html><html lang="ko"><head>
       </div>
       <div class="toolbar">
         <button type="submit">실행 → 단계별로 보기</button>
-        <a class="btn ghost" href="/bad">실패 장면 불러오기</a>
+        <a class="btn ghost" href="/bad#step-3">실패 장면 불러오기</a>
       </div>
     </form>
     {notice}
@@ -265,6 +265,7 @@ function pick(sel){{ if(S[sel.value]) document.getElementById('text').value=S[se
   let cur=has?1:0;
   const m=location.hash.match(/^#step-([0-9]+)$/);
   if(m&&+m[1]<=last) cur=+m[1];
+  else if(has && location.pathname==='/bad') cur=Math.min(3,last);
   function go(n,scroll){{
     cur=n;
     steps.forEach(s=>{{ s.hidden=(+s.dataset.step!==n); }});
