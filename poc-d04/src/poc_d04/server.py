@@ -182,6 +182,7 @@ PAGE = """<!doctype html><html lang="ko"><head>
     <div class="toolbar">
       <button type="submit">추출 → 규칙 검사 → 게이트 감사</button>
       <a class="linkish" href="/bad">실패 장면 불러오기 (잘못된 초안)</a>
+      <a class="jump" href="#result-anchor">결과로 ↓</a>
     </div>
   </form>
   <div class="results">{result}</div>
