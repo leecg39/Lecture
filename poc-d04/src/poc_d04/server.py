@@ -239,8 +239,8 @@ class Demo:
             out.append('<h2 class="results-h">게이트 위반</h2><div class="gate-list">')
             for v in viol:
                 out.append(
-                    f'<div class="gate"><span class="gate-code">{_e(v["코드"])}</span>'
-                    f'<div><b>{_e(v["항목ID"] or "(문서)")}</b> · {_e(v["설명"])}'
+                    f'<div class="gate"><span class="gate-code"><b>{_e(v["코드"])}</b></span>'
+                    f'<div><span class="gate-item">{_e(v["항목ID"] or "(문서)")}</span> · {_e(v["설명"])}'
                     f'<div class="gate-rule">{_e(v["게이트"])}</div></div></div>'
                 )
             out.append("</div>")
