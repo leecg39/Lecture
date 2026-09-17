@@ -29,3 +29,5 @@ test:
 
 clean:
 	rm -rf out data examples/D04_오프라인_추출결과
+serve:
+	$(PY) -m poc_d04 serve

@@ -27,6 +27,15 @@ make test         # 테스트(pytest)
 
 `python -m poc_d04 --help`로 개별 명령(`gen`, `run`, `check-paste`, `eval`, `workbook`, `examples`)을 볼 수 있습니다.
 
+### 시연용 로컬 웹 데모
+
+```bash
+make serve        # http://127.0.0.1:8765  (표준 라이브러리만 사용, 로컬 전용)
+```
+
+표본 선택 또는 원문 입력 → 누락 표시표·게이트 위반·보완 질문·정답표 대조를 한 화면에 보여 줍니다.
+"ChatGPT 출력 JSON" 칸에 붙이면 그 출력을 검사하고, `/bad`는 실패 장면(잘못된 초안)을 바로 띄웁니다.
+
 ### ChatGPT 출력 검사 (시연·실습에서 실제 쓰는 경로)
 
 ```bash

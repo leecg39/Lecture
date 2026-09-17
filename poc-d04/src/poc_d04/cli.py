@@ -77,6 +77,13 @@ def cmd_examples(_a):
         print(f"예시 → {p}")
 
 
+def cmd_serve(a):
+    from .server import serve
+    if not (DATA / "D04_원문위치_정답표.json").exists():
+        cmd_gen(a)
+    serve(a.host, a.port, DATA)
+
+
 def cmd_all(a):
     cmd_gen(a)
     a.backend = "rule"
@@ -102,6 +109,10 @@ def main(argv=None) -> int:
     sub.add_parser("workbook", help="xlsx 활동지").set_defaults(fn=cmd_workbook)
     sub.add_parser("examples", help="실패 장면·오프라인 캡처").set_defaults(fn=cmd_examples)
     sub.add_parser("all", help="gen→run→workbook→examples").set_defaults(fn=cmd_all)
+    s = sub.add_parser("serve", help="시연용 로컬 웹 데모")
+    s.add_argument("--host", default="127.0.0.1")
+    s.add_argument("--port", type=int, default=8765)
+    s.set_defaults(fn=cmd_serve)
     a = p.parse_args(argv)
     rc = a.fn(a)
     return rc or 0
