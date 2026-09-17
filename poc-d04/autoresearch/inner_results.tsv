@@ -1,2 +1,4 @@
 experiment	commit	hypothesis	score	error	dom	form	visual	design	decision	notes
 0	baseline	current bare CSS	72.0	100	100	100	60	0	KEEP	pre-experiment baseline
+1	6fb57d5	industrial slate CSS system	100.0	100	100	100	100	100	KEEP	72→100 guard pass
+2	bc2cedb	result summary chips + denser gates	100.0	100	100	100	100	100	KEEP	metric saturated; qualitative 시연 fold improvement; Guard pass after markup adapt
