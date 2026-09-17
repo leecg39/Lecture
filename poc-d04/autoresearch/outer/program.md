@@ -37,7 +37,7 @@ cd poc-d04 && PYTHONPATH=src .venv/bin/python -m pytest -q
 7. 시연 거리(프로젝터)에서도 CTA·표 헤더가 읽혀야 한다.
 
 ## Iterations (이번 세션)
-Bounded: Inner 3–7 완료. 이후 `autoresearch.md`에 상태 남기고 중단(resume 가능).
+Bounded: Inner 8–12 완료 (재실행). 이후 `autoresearch.md`에 상태 남기고 중단.
 
 ## Outer update (round 1 → 2)
 Frozen Metric이 실험 1에서 100으로 포화됨. 이후 실험은:
@@ -49,6 +49,11 @@ Frozen Metric이 실험 1에서 100으로 포화됨. 이후 실험은:
 정성 Inner(3–7) 전부 KEEP, 점수는 계속 100. Frozen Metric이 더 이상 변별하지 못한다.
 다음 Inner는 **새 위젯을 넣지 않는다.** 회귀 수정만.
 사람이 `eval/`에 대비·fold 스크린샷 체크를 추가하기 전에는 Inner를 재개하지 말 것. Inner는 eval을 수정하지 않는다.
+
+## Outer update (round 3 → 4)
+재실행 Inner 8–12도 전부 KEEP·100. 변별력은 여전히 0.
+허용된 정성 개선(sticky stepper, /bad→게이트, 대비, 1–5 키, 확인필요 행)은 반영됨.
+다음은 회귀만. 새 위젯·새 색 실험은 DISCARD 기본.
 
 ## Dev server
 ```

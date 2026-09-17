@@ -1,3 +1,4 @@
 round	strategy_change	final_score	outer_score	notes
 1	metric saturated→qualitative 시연 readability	100	80.0	final@round1; exp2 qualitative keep
 2	qualitative 시연 pacing then freeze chrome	100	95.0	exp3–7 KEEP; outer_score(100,1,28)=95; stop until eval v2
+3	user rerun: pacing/contrast/hotkeys no new widgets	100	95.0	exp8–12 KEEP; metric still maxed; freeze chrome again

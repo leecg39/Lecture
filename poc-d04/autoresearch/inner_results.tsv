@@ -7,3 +7,8 @@ experiment	commit	hypothesis	score	error	dom	form	visual	design	decision	notes
 5	a7a75ba	사람 확정 열 헤더 CSS 비움 라벨+두꺼운 악센트	100.0	100	100	100	100	100	KEEP	td.human 비움 유지; score 100; guard 44 pass
 6	6c4e07d	실패 장면 고스트 버튼 CTA	100.0	100	100	100	100	100	KEEP	/bad 링크 유지; score 100; guard 44 pass
 7	af36a84	prefers-reduced-motion 스테퍼 트랜지션 제거	100.0	100	100	100	100	100	KEEP	a11y; score 100; guard 44 pass
+8	c30f343	sticky stepper 스크롤 중에도 단계 고정	100.0	100	100	100	100	100	KEEP	시연 거리; score 100; guard 44 pass
+9	875cc1f	/bad 게이트 단계(#step-3)부터 시작	100.0	100	100	100	100	100	KEEP	6-8분 시연 박자; score 100; guard 44 pass
+10	0cc2efc	ink/muted 대비 상향	100.0	100	100	100	100	100	KEEP	프로젝터 본문 대비; score 100; guard 44 pass
+11	92b565f	숫자키 1-5로 스테퍼 점프	100.0	100	100	100	100	100	KEEP	시연 핫키; score 100; guard 44 pass
+12	cab11f9	확인 필요 행 전체 하이라이트	100.0	100	100	100	100	100	KEEP	tr:has(td.flag); score 100; guard 44 pass
