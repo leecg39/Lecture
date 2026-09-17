@@ -1,0 +1,36 @@
+[
+  {
+    "path": "/",
+    "name": "홈(입력)",
+    "checks": {
+      "required_selectors": ["form", "textarea#text", "select[name=doc]", "button[type=submit]", "a[href='/bad']"],
+      "required_text": ["구매 요청서", "추출"],
+      "no_console_errors": true
+    }
+  },
+  {
+    "path": "/bad",
+    "name": "실패 장면",
+    "checks": {
+      "required_selectors": ["table", "td.human", ".gate"],
+      "required_text": ["게이트", "G2", "사람 확정"],
+      "no_console_errors": true,
+      "forms": []
+    }
+  },
+  {
+    "path": "/run",
+    "name": "시연 사례 POST",
+    "method": "POST",
+    "body": {
+      "doc": "D04-13",
+      "text": "A현장, 품목 P-01 20개, 다음 주 필요.",
+      "pasted": ""
+    },
+    "checks": {
+      "required_selectors": ["table", "td.human"],
+      "required_text": ["희망일", "배송 위치", "게이트 위반 없음"],
+      "no_console_errors": true
+    }
+  }
+]
