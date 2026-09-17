@@ -39,6 +39,12 @@ cd poc-d04 && PYTHONPATH=src .venv/bin/python -m pytest -q
 ## Iterations (이번 세션)
 Bounded: **6회**. 이후 `autoresearch.md`에 상태 남기고 중단(resume 가능).
 
+## Outer update (round 1 → 2)
+Frozen Metric이 실험 1에서 100으로 포화됨. 이후 실험은:
+- 점수 **100 유지** + Guard 통과 필수
+- 추가 판정(정성): 시연 거리 가독성 — 결과 요약이 fold 위에 보이는가, 게이트 카드가 스캔 가능한가, 사람 확정 열이 표에서 즉시 식별되는가
+- 악화(정보 밀도↓, 대비↓, CTA 약화)면 DISCARD
+
 ## Dev server
 ```
 cd poc-d04 && PYTHONPATH=src .venv/bin/python -m poc_d04 serve

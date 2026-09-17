@@ -121,6 +121,33 @@ pre{
 }
 code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.92em}
 .meta{color:var(--muted);font-size:13px}
+.summary-strip{
+  display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 18px;padding:12px;
+  border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow);
+}
+.chip{
+  display:flex;flex-direction:column;gap:2px;min-width:120px;
+  padding:8px 12px;border-radius:9px;background:#f0eeea;border:1px solid var(--line);
+}
+.chip .k{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.chip .v{font-size:14px;font-weight:600;color:var(--ink)}
+.chip.good{background:var(--ok-bg);border-color:#b7d7c5}
+.chip.bad{background:var(--bad-bg);border-color:#e2b4b4}
+.chip.hot{background:#fff1df;border-color:#e7c48a}
+.chip.hot .v,.chip.bad .v{color:var(--bad)}
+.results-h{margin:22px 0 10px;font-size:16px;font-weight:600}
+.gate-list{display:grid;gap:8px}
+.gate{display:flex;gap:12px;align-items:flex-start}
+.gate-code{
+  flex:0 0 auto;font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:700;
+  font-size:13px;padding:4px 8px;border-radius:6px;background:#fff;border:1px solid #e2b4b4;color:var(--bad);
+}
+.gate-rule{margin-top:4px;color:var(--muted);font-size:12px}
+.qlist{margin:0;padding-left:1.2rem;line-height:1.55}
+.json-box{margin-top:18px;border:1px solid var(--line);border-radius:var(--radius);background:#fff;padding:8px 12px}
+.json-box summary{cursor:pointer;font-weight:600;color:var(--brand)}
+.json-box pre{margin:10px 0 4px}
+a.jump{margin-left:auto;font-size:13px;color:var(--brand-2);font-weight:600}
 """
 
 PAGE = """<!doctype html><html lang="ko"><head>
@@ -195,38 +222,77 @@ class Demo:
         except ValueError as ex:
             return f'<div class="gate">{_e(ex)}</div>'
         res, viol, warn = r["판정"], r["게이트위반"], r["추출"].get("경고", [])
-        out = [f"<h2>결과 · 백엔드 <code>{_e(backend)}</code></h2>"]
+        need = [it["항목명"] for it in res["항목"] if it["확인필요"]]
+        out = [
+            '<div id="result-anchor" class="summary-strip">',
+            f'<div class="chip"><span class="k">백엔드</span><span class="v">{_e(backend)}</span></div>',
+            f'<div class="chip {"bad" if viol else "good"}"><span class="k">게이트</span><span class="v">{len(viol)}건 위반</span></div>',
+            f'<div class="chip {"hot" if need else "good"}"><span class="k">확인 필요</span><span class="v">{_e(", ".join(need) or "없음")}</span></div>',
+            '<div class="chip"><span class="k">사람 확정</span><span class="v">표 마지막 열 · 비움</span></div>',
+            "</div>",
+            f'<h2 class="results-h">결과 · 백엔드 <code>{_e(backend)}</code></h2>',
+        ]
         for w in warn:
             out.append(f'<div class="warn">경고: {_e(w)}</div>')
         if viol:
-            out.append('<h2>게이트 위반</h2>')
+            out.append('<h2 class="results-h">게이트 위반</h2><div class="gate-list">')
             for v in viol:
-                out.append(f'<div class="gate"><b>{_e(v["코드"])}</b> · {_e(v["항목ID"] or "(문서)")} · {_e(v["설명"])}<br><small>{_e(v["게이트"])}</small></div>')
+                out.append(
+                    f'<div class="gate"><span class="gate-code">{_e(v["코드"])}</span>'
+                    f'<div><b>{_e(v["항목ID"] or "(문서)")}</b> · {_e(v["설명"])}'
+                    f'<div class="gate-rule">{_e(v["게이트"])}</div></div></div>'
+                )
+            out.append("</div>")
         else:
             out.append('<div class="ok">게이트 위반 없음 — 원문 없는 값을 채우지 않았다.</div>')
-        out.append('<h2>누락 표시표</h2><div class="table-wrap"><table><tr><th>항목</th><th>원문 값</th><th>원문 위치</th><th>표준명 후보 (AI 제안)</th>'
-                   '<th>상태 (규칙)</th><th>근거</th><th>보완 질문 초안 (AI 제안)</th><th class="human-h">사람 확정</th></tr>')
+        out.append(
+            '<h2 class="results-h">누락 표시표</h2><div class="table-wrap"><table><tr>'
+            "<th>항목</th><th>원문 값</th><th>원문 위치</th><th>표준명 후보 (AI 제안)</th>"
+            '<th>상태 (규칙)</th><th>근거</th><th>보완 질문 초안 (AI 제안)</th>'
+            '<th class="human-h">사람 확정</th></tr>'
+        )
         for it in res["항목"]:
             pos = f'{it["원문시작"]}–{it["원문끝"]}' if it["원문시작"] is not None else ""
             st = ("확인 필요 · " if it["확인필요"] else "") + it["상태"]
-            out.append(f'<tr><td>{_e(it["항목명"])}</td><td>{_e(it["원문값"]) if it["원문값"] is not None else "<i>(없음)</i>"}</td>'
-                       f'<td>{_e(pos)}</td><td>{_e(it["표준명후보"])}</td>'
-                       f'<td class="{"flag" if it["확인필요"] else ""}">{_e(st)}</td><td>{_e(it["근거"])}</td>'
-                       f'<td>{_e(it["보완질문"])}</td><td class="human"></td></tr>')
+            out.append(
+                f'<tr><td>{_e(it["항목명"])}</td>'
+                f'<td>{_e(it["원문값"]) if it["원문값"] is not None else "<i>(없음)</i>"}</td>'
+                f'<td>{_e(pos)}</td><td>{_e(it["표준명후보"])}</td>'
+                f'<td class="{"flag" if it["확인필요"] else ""}">{_e(st)}</td>'
+                f'<td>{_e(it["근거"])}</td><td>{_e(it["보완질문"])}</td>'
+                '<td class="human"></td></tr>'
+            )
         out.append("</table></div>")
-        names = [it["항목명"] for it in res["항목"] if it["확인필요"]]
-        out.append(f"<p><b>확인 필요 항목:</b> {_e(', '.join(names) or '없음')}</p>")
+        out.append(f'<p class="meta"><b>확인 필요 항목:</b> {_e(", ".join(need) or "없음")}</p>')
         qs = res.get("보완질문요약", [])
         if qs:
-            out.append("<h2>보완 질문 초안</h2><ol>" + "".join(f"<li>{_e(q)}</li>" for q in qs) + "</ol>")
+            out.append(
+                '<h2 class="results-h">보완 질문 초안</h2><ol class="qlist">'
+                + "".join(f"<li>{_e(q)}</li>" for q in qs)
+                + "</ol>"
+            )
         if doc_id and doc_id in self.ds["문서"] and self.ds["문서"][doc_id]["원문"] == text:
             m = score({doc_id: res}, self.ds)["전체"]
-            out.append(f"<h2>정답표 대조 ({_e(doc_id)})</h2><p>탐지 {m['탐지']}/{m['정답확인필요']} · 오탐 {m['오탐']} · "
-                       f"중요 오류 {m['중요 오류']} · 상태 정확도 {m['상태 정확도']*100:.0f}%</p>")
+            out.append(f'<h2 class="results-h">정답표 대조 ({_e(doc_id)})</h2>')
+            out.append(
+                f'<p class="meta">탐지 {m["탐지"]}/{m["정답확인필요"]} · 오탐 {m["오탐"]} · '
+                f'중요 오류 {m["중요 오류"]} · 상태 정확도 {m["상태 정확도"]*100:.0f}%</p>'
+            )
             if m["미스"]:
-                out.append("<table><tr><th>항목</th><th>정답</th><th>예측</th><th>정답 사유</th></tr>" + "".join(
-                    f"<tr><td>{_e(x['항목'])}</td><td>{_e(x['정답'])}</td><td>{_e(x['예측'])}</td><td>{_e(x['정답사유'])}</td></tr>" for x in m["미스"]) + "</table>")
-        out.append("<h2>추출 JSON</h2><pre>" + _e(json.dumps(r["추출"], ensure_ascii=False, indent=1)) + "</pre>")
+                out.append(
+                    '<div class="table-wrap"><table><tr><th>항목</th><th>정답</th><th>예측</th><th>정답 사유</th></tr>'
+                    + "".join(
+                        f"<tr><td>{_e(x['항목'])}</td><td>{_e(x['정답'])}</td>"
+                        f"<td>{_e(x['예측'])}</td><td>{_e(x['정답사유'])}</td></tr>"
+                        for x in m["미스"]
+                    )
+                    + "</table></div>"
+                )
+        out.append(
+            '<details class="json-box"><summary>추출 JSON</summary><pre>'
+            + _e(json.dumps(r["추출"], ensure_ascii=False, indent=1))
+            + "</pre></details>"
+        )
         return "".join(out)
 
 
