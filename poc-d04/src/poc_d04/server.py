@@ -156,7 +156,12 @@ code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.92em}
 .json-box pre{margin:10px 0 4px}
 a.jump{margin-left:auto;font-size:13px;color:var(--brand-2);font-weight:600}
 /* 단계 진행 UI */
-.stepper{display:flex;flex-wrap:wrap;gap:6px;margin:18px 0 14px;padding:0;list-style:none}
+.stepper{
+  display:flex;flex-wrap:wrap;gap:6px;margin:18px 0 14px;padding:8px 0;
+  list-style:none; position:sticky; top:0; z-index:5;
+  background:linear-gradient(180deg,rgba(243,241,236,.97),rgba(243,241,236,.92));
+  backdrop-filter:blur(8px);
+}
 .stepper li{
   display:flex;align-items:center;gap:8px;padding:8px 16px 8px 10px;border-radius:999px;
   border:1px solid var(--line);background:#fff;font-size:14px;font-weight:600;color:var(--muted);
