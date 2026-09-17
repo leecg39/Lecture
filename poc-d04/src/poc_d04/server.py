@@ -105,8 +105,14 @@ th{
   font-weight:600; font-size:13px; letter-spacing:.02em;
 }
 th.human-h,td.human{
-  background:var(--human); color:var(--human-ink); font-weight:600;
-  box-shadow:inset 3px 0 0 var(--accent);
+  background:var(--human); color:var(--human-ink); font-weight:700;
+  box-shadow:inset 6px 0 0 var(--accent);
+  min-width:7.5rem;
+}
+th.human-h::after{
+  content:" · 비움";
+  font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+  font-weight:600; opacity:.85;
 }
 td.flag{color:var(--bad);font-weight:700}
 .gate,.ok,.warn{
