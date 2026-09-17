@@ -37,13 +37,18 @@ cd poc-d04 && PYTHONPATH=src .venv/bin/python -m pytest -q
 7. 시연 거리(프로젝터)에서도 CTA·표 헤더가 읽혀야 한다.
 
 ## Iterations (이번 세션)
-Bounded: **6회**. 이후 `autoresearch.md`에 상태 남기고 중단(resume 가능).
+Bounded: Inner 3–7 완료. 이후 `autoresearch.md`에 상태 남기고 중단(resume 가능).
 
 ## Outer update (round 1 → 2)
 Frozen Metric이 실험 1에서 100으로 포화됨. 이후 실험은:
 - 점수 **100 유지** + Guard 통과 필수
 - 추가 판정(정성): 시연 거리 가독성 — 결과 요약이 fold 위에 보이는가, 게이트 카드가 스캔 가능한가, 사람 확정 열이 표에서 즉시 식별되는가
 - 악화(정보 밀도↓, 대비↓, CTA 약화)면 DISCARD
+
+## Outer update (round 2 → 3)
+정성 Inner(3–7) 전부 KEEP, 점수는 계속 100. Frozen Metric이 더 이상 변별하지 못한다.
+다음 Inner는 **새 위젯을 넣지 않는다.** 회귀 수정만.
+사람이 `eval/`에 대비·fold 스크린샷 체크를 추가하기 전에는 Inner를 재개하지 말 것. Inner는 eval을 수정하지 않는다.
 
 ## Dev server
 ```

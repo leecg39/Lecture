@@ -2,3 +2,8 @@ experiment	commit	hypothesis	score	error	dom	form	visual	design	decision	notes
 0	baseline	current bare CSS	72.0	100	100	100	60	0	KEEP	pre-experiment baseline
 1	6fb57d5	industrial slate CSS system	100.0	100	100	100	100	100	KEEP	72→100 guard pass
 2	bc2cedb	result summary chips + denser gates	100.0	100	100	100	100	100	KEEP	metric saturated; qualitative 시연 fold improvement; Guard pass after markup adapt
+3	ecaed25	stepper wizard 입력→추출→규칙→게이트→질문	100.0	100	100	100	100	100	KEEP	qualitative 시연 pacing; score saturated 100; guard 44 pass
+4	ca46b85	projector-scale type 제목·표·칩·스테퍼·CTA	100.0	100	100	100	100	100	KEEP	시연 거리 가독성; score 100; guard 44 pass
+5	a7a75ba	사람 확정 열 헤더 CSS 비움 라벨+두꺼운 악센트	100.0	100	100	100	100	100	KEEP	td.human 비움 유지; score 100; guard 44 pass
+6	6c4e07d	실패 장면 고스트 버튼 CTA	100.0	100	100	100	100	100	KEEP	/bad 링크 유지; score 100; guard 44 pass
+7	af36a84	prefers-reduced-motion 스테퍼 트랜지션 제거	100.0	100	100	100	100	100	KEEP	a11y; score 100; guard 44 pass
