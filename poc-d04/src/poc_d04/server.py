@@ -162,6 +162,10 @@ a.jump{margin-left:auto;font-size:13px;color:var(--brand-2);font-weight:600}
   border:1px solid var(--line);background:#fff;font-size:14px;font-weight:600;color:var(--muted);
   cursor:pointer;user-select:none;transition:background .15s,color .15s;
 }
+@media (prefers-reduced-motion:reduce){
+  .stepper li{transition:none}
+  html{scroll-behavior:auto}
+}
 .stepper li .n{
   display:inline-flex;width:22px;height:22px;border-radius:50%;align-items:center;justify-content:center;
   background:#e9e5dc;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--ink);
