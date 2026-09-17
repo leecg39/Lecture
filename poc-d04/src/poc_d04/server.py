@@ -115,6 +115,7 @@ th.human-h::after{
   font-weight:600; opacity:.85;
 }
 td.flag{color:var(--bad);font-weight:700}
+tr:has(td.flag){background:#fbf3ea}
 .gate,.ok,.warn{
   border-radius:8px; padding:11px 14px; margin:8px 0; border:1px solid transparent;
   font-size:13.5px; line-height:1.45;
