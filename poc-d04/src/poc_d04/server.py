@@ -23,7 +23,7 @@ DATA = ROOT / "data"
 CSS = """
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 :root{
-  --ink:#1a2332; --muted:#5c6b7a; --paper:#f3f1ec; --panel:#fffcf7;
+  --ink:#121820; --muted:#3f4c59; --paper:#f3f1ec; --panel:#fffcf7;
   --line:#d5d0c6; --brand:#0f3d3e; --brand-2:#1a5c5e; --accent:#c47a2c;
   --ok:#1f6b45; --ok-bg:#e4f2ea; --bad:#9b1c1c; --bad-bg:#f8e4e4;
   --warn:#8a5a12; --warn-bg:#f7edd8; --human:#f3e2b3; --human-ink:#6b4e10;
