@@ -249,7 +249,7 @@ PAGE = """<!doctype html><html lang="ko"><head>
   {result}
   <nav class="step-nav" id="stepnav" hidden>
     <button type="button" class="ghost" id="prev">← 이전</button>
-    <span class="kbd-hint"><span id="stepinfo"></span> · <kbd>←</kbd> <kbd>→</kbd> 키로 이동</span>
+    <span class="kbd-hint"><span id="stepinfo"></span> · <kbd>←</kbd> <kbd>→</kbd> · <kbd>1</kbd>–<kbd>5</kbd></span>
     <button type="button" id="next">다음 →</button>
   </nav>
 </div>
@@ -290,6 +290,10 @@ function pick(sel){{ if(S[sel.value]) document.getElementById('text').value=S[se
     if(e.target.matches('textarea,select,input')) return;
     if(e.key==='ArrowRight'&&has&&cur<last) go(cur+1,true);
     if(e.key==='ArrowLeft'&&cur>0) go(cur-1,true);
+    if(e.key>='1'&&e.key<='5'){{
+      const k=+e.key-1;
+      if(k<=last && (k===0||has)) go(k,true);
+    }}
   }});
   go(cur,false);
 }})();
