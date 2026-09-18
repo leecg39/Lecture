@@ -191,7 +191,10 @@ a.jump{margin-left:auto;font-size:13px;color:var(--brand-2);font-weight:600}
 .step .results-h{margin-top:16px}
 .step-nav{
   display:flex;justify-content:space-between;align-items:center;gap:12px;
-  margin-top:22px;padding-top:14px;border-top:1px solid var(--line);
+  position:sticky; bottom:0; z-index:4;
+  margin-top:22px; padding:12px 0 10px;
+  border-top:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(243,241,236,.2),rgba(243,241,236,.96) 28%);
 }
 .step-nav[hidden]{display:none}
 button.ghost,a.btn.ghost{background:transparent;color:var(--brand);border:1px solid var(--line);box-shadow:none}
