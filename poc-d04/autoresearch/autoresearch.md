@@ -3,6 +3,7 @@
 - Started: 2026-09-17
 - Resumed: 2026-09-18 (RSI Inner 3–7 + Outer round 2)
 - Rerun: 2026-09-18 (Inner 8–12 + Outer round 3)
+- Rerun: 2026-09-18 (Inner 13–17 + Outer round 4)
 - Target: `src/poc_d04/server.py` (CSS + PAGE + result markup)
 - Dev: `http://127.0.0.1:8765`
 - Mode: Bounded RSI. Frozen Metric ceiling after exp 1.
@@ -23,6 +24,11 @@
 | 10 | 100 | KEEP | ink/muted 대비 |
 | 11 | 100 | KEEP | 숫자 키 1–5 |
 | 12 | 100 | KEEP | 확인 필요 행 하이라이트 |
+| 13 | 100 | KEEP | scroll-padding-top |
+| 14 | 100 | KEEP | sticky bottom step-nav |
+| 15 | 100 | KEEP | 게이트 코드 배지 확대 |
+| 16 | 100 | KEEP | 성공기준 왼쪽 액센트 |
+| 17 | 100 | KEEP | 미사용 CSS 삭제 |
 
 - Numeric improvement: **+28 pts** (72 → 100), first hit at exp 1
 - Guard: pytest **44 passed** every KEEP
@@ -33,7 +39,7 @@
 Frozen Metric no longer ranks UI. Inner chrome should freeze. A harder eval (contrast, fold screenshot) needs a **human-owned eval v2**. Inner Loop must not edit `eval/` or `meta_eval/`.
 
 ## Resume
-Rerun 8–12 did not move the Frozen Metric. Do not start Inner unless:
+Rerun 8–17 did not move the Frozen Metric. Do not start Inner unless:
 1. Guard is red, or
 2. Human extended `eval/` (new Frozen checks), or
 3. A real 시연 회귀가 있다.

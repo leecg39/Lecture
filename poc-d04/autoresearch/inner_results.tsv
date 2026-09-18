@@ -12,3 +12,8 @@ experiment	commit	hypothesis	score	error	dom	form	visual	design	decision	notes
 10	0cc2efc	ink/muted 대비 상향	100.0	100	100	100	100	100	KEEP	프로젝터 본문 대비; score 100; guard 44 pass
 11	92b565f	숫자키 1-5로 스테퍼 점프	100.0	100	100	100	100	100	KEEP	시연 핫키; score 100; guard 44 pass
 12	cab11f9	확인 필요 행 전체 하이라이트	100.0	100	100	100	100	100	KEEP	tr:has(td.flag); score 100; guard 44 pass
+13	906cc29	scroll-padding-top 56px 스테퍼 가림 방지	100.0	100	100	100	100	100	KEEP	qualitative jump; score 100; guard 44 pass
+14	46dbdc5	sticky bottom step-nav	100.0	100	100	100	100	100	KEEP	시연 페이징; score 100; guard 44 pass
+15	ba6e1bb	게이트 코드 배지 16px	100.0	100	100	100	100	100	KEEP	프로젝터 스캔; score 100; guard 44 pass
+16	0d2fa04	성공기준 문장 왼쪽 액센트	100.0	100	100	100	100	100	KEEP	criterion scan; score 100; guard 44 pass
+17	fa66042	미사용 .results/.jump CSS 삭제	100.0	100	100	100	100	100	KEEP	simplicity same metric; score 100; guard 44 pass
