@@ -5,6 +5,7 @@
 - Rerun: 2026-09-18 (Inner 8–12 + Outer round 3)
 - Rerun: 2026-09-18 (Inner 13–17 + Outer round 4)
 - Round 5: 2026-09-18 (Inner 18–22, 사람 지시 — 게이트 감사 단계 기능 확장, PDF M03 기반)
+- Rerun: 2026-09-18 (Inner 23–27 + Outer round 6 — STEP 4 크롬만)
 - Target: `src/poc_d04/server.py` (CSS + PAGE + result markup); round 5에서 `gate.py`·`extract.py(load_pasted)`·`examples.py`까지 한정 확장
 - Dev: `http://127.0.0.1:8765`
 - Mode: Bounded RSI. Frozen Metric ceiling after exp 1.
@@ -35,6 +36,11 @@
 | 20 | 100 | KEEP | [R5] 원문 근거 하이라이트 + 원문 추적 비율 칩 (PDF p8·p13) |
 | 21 | 100 | KEEP | [R5] **G6 범위 밖 행위** — 최저가·공급사 선정·자동 발주·자재군 확대 (PDF p9) |
 | 22 | 100 | KEEP | [R5] 판정 배너 계속 / 재시험 (PDF p10 성공·수정·중단) |
+| 23 | 100 | KEEP | scroll-padding-bottom |
+| 24 | 100 | KEEP | 미사용 .linkish/.arrow 삭제 |
+| 25 | 100 | KEEP | 원문 하이라이트 필드 태그 확대 |
+| 26 | 100 | KEEP | 계속/재시험 판정 배너 글자 확대 |
+| 27 | 100 | KEEP | 키보드 힌트 칩 확대 |
 
 - Numeric improvement: **+28 pts** (72 → 100), first hit at exp 1
 - Guard: pytest **44 passed** every KEEP (round 5부터 **45 passed**, G6 테스트 추가)
@@ -52,7 +58,7 @@
 Frozen Metric no longer ranks UI. Inner chrome should freeze. A harder eval (contrast, fold screenshot) needs a **human-owned eval v2**. Inner Loop must not edit `eval/` or `meta_eval/`.
 
 ## Resume
-Round 5 (18–22) landed all PDF-mapped gate features; target is back to `server.py` chrome only. Do not start Inner unless:
+Round 6 (23–27) polished STEP 4 scan only. Metric still 100. Do not start Inner unless:
 1. Guard is red, or
 2. Human extended `eval/` (new Frozen checks), or
 3. A real 시연 회귀가 있다.

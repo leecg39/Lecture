@@ -37,7 +37,7 @@ cd poc-d04 && PYTHONPATH=src .venv/bin/python -m pytest -q
 7. 시연 거리(프로젝터)에서도 CTA·표 헤더가 읽혀야 한다.
 
 ## Iterations (이번 세션)
-Bounded: Inner 13–17 완료 (재실행). 이후 `autoresearch.md`에 상태 남기고 중단.
+Bounded: Inner 23–27 완료 (재실행). 이후 `autoresearch.md`에 상태 남기고 중단.
 
 ## Outer update (round 1 → 2)
 Frozen Metric이 실험 1에서 100으로 포화됨. 이후 실험은:
@@ -81,6 +81,10 @@ Target 확장 (이번 라운드만):
 불변: `eval/`, `meta_eval/`, 정답표·데이터, 사람 확정 칸 공란, 규칙 백엔드는 게이트 위반 0.
 Guard: pytest 전체 통과. Frozen Metric 100 유지(회귀 감지용).
 Bounded: Inner 18–22.
+
+## Outer update (round 6)
+사용자 재실행 Inner 23–27: STEP 4 크롬 가독성만 (scroll-padding-bottom, dead CSS, 원문 태그, 판정 배너, kbd). 전부 KEEP·100·Guard 45.
+기능 추가는 없음. Frozen Metric 변별력 없음. 다음은 회귀 아니면 no-op.
 
 ## Dev server
 ```

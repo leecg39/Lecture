@@ -22,3 +22,8 @@ experiment	commit	hypothesis	score	error	dom	form	visual	design	decision	notes
 20	a865c65	원문 근거 <mark> 하이라이트 + 원문 추적 비율 칩 (PDF p8·p13)	100.0	100	100	100	100	100	KEEP	/bad 3/6·50% 추적; score 100; guard 44 pass
 21	94a07d2	G6 범위 밖 행위 — load_pasted 범위밖 보존, 실패 장면에 공급사 최저가 추가 (PDF p9)	100.0	100	100	100	100	100	KEEP	규칙 백엔드 위반 0 유지; score 100; guard 45 pass (G6 테스트 추가)
 22	d486697	판정 배너 계속/재시험 (PDF p10 성공·수정·중단)	100.0	100	100	100	100	100	KEEP	server 테스트에 게이트 단계 단언 추가; score 100; guard 45 pass
+23	9a35080	scroll-padding-bottom 72px	100.0	100	100	100	100	100	KEEP	sticky nav overlap; score 100; guard 45 pass
+24	8a59ad0	미사용 .linkish/.arrow CSS 삭제	100.0	100	100	100	100	100	KEEP	simplicity; score 100; guard 45 pass
+25	505572c	원문 하이라이트 필드 태그 12px	100.0	100	100	100	100	100	KEEP	projector tags; score 100; guard 45 pass
+26	cfaf8ca	판정 배너 계속/재시험 글자 확대	100.0	100	100	100	100	100	KEEP	gate step scan; score 100; guard 45 pass
+27	7f9fd6f	키보드 힌트 칩 확대	100.0	100	100	100	100	100	KEEP	step-nav projector; score 100; guard 45 pass
