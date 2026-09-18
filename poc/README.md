@@ -1,32 +1,33 @@
-# React + TypeScript + Vite
+# 발주신청서 양식 정밀 체크 (MAN-02)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+국토교통부 CPMS 표준에 맞춘 **4단계 발주요청** 브라우저 PoC입니다.
 
-Currently, two official plugins are available:
+`자동 체크 → 스마트 수정 → 사전 검수 → 발주요청`
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 실행
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+cd poc
+npm install
+npm test
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+브라우저에서 `http://localhost:5173` (또는 5174). 키보드 `1`–`4`로 단계를 넘깁니다.
+
+## 단계
+
+1. **자동 체크** — 6대 항목(품목 ID·수량·단위·희망일·배송 위치·규격) 누락·모호·단위 오류 진단, 적합도 점수
+2. **스마트 수정** — MAT-XXX 코드·공인 단위·규격 권장값 일괄/개별 적용 (희망일은 날짜를 지어내지 않음)
+3. **사전 검수** — 6대 항목 승인 뱃지 + 검수 책임자 확인 체크
+4. **발주요청** — PO 미리보기, 공급업체·우선순위 입력 후 발주 번호 부여
+
+## 팁
+
+- [모호한 표현/틀린 단위 테스트용 샘플]로 결함 감지 엔진을 시험합니다.
+- KS 프리셋(볼밸브·PVC·강관·엘보)으로 검증된 요청서를 바로 불러올 수 있습니다.
+
+## 관련
+
+- 매뉴얼: `../MAN-02-발주신청서-양식-정밀-체크-및-4단계-발주요청-프로세스.md`
+- 강사 검증 백엔드(교육용 게이트): `../poc-d04`
