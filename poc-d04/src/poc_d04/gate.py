@@ -26,9 +26,26 @@ GATE_TEXT = {
     "G5": "최종 확정은 사람이 한다. AI 출력은 '제안' 열에만 둔다.",
 }
 
+# 위반 시 권고 조치와 확인 담당 (M03 PoC 설계 p6: AI 초안 → 현장 담당자 → 본사 구매·지원팀)
+GATE_ACTION = {
+    "G1": "값을 비우고 '확인 필요'로 되돌린다. 원문 위치를 찾을 수 없으면 담당자에게 확인한다.",
+    "G2": "날짜를 삭제하고 원문 표현('다음 주')을 그대로 둔다. 정확한 날짜는 보완 질문으로 묻는다.",
+    "G3": "한 품목으로 좁히지 말고 후보를 모두 남긴다. 규격은 담당자가 확정한다.",
+    "G4": "규격 값을 삭제한다. 필요한 규격은 담당자에게 확인한다.",
+    "G5": "사람 확정 칸을 비운다. AI 출력은 '제안' 열로 옮긴다.",
+}
+GATE_OWNER = {
+    "G1": "현장 담당자",
+    "G2": "현장 담당자",
+    "G3": "본사 구매·지원팀",
+    "G4": "현장 담당자",
+    "G5": "본사 구매·지원팀",
+}
+
 
 def _v(code: str, field: str | None, detail: str) -> dict:
-    return {"코드": code, "게이트": GATE_TEXT[code], "항목ID": field, "설명": detail}
+    return {"코드": code, "게이트": GATE_TEXT[code], "항목ID": field, "설명": detail,
+            "조치": GATE_ACTION[code], "담당": GATE_OWNER[code]}
 
 
 def _in_text(text: str, value: str) -> bool:

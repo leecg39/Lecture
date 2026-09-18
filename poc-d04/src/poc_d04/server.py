@@ -151,6 +151,21 @@ code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.92em}
   font-size:16px;padding:6px 10px;border-radius:6px;background:#fff;border:1px solid #e2b4b4;color:var(--bad);
 }
 .gate-rule{margin-top:4px;color:var(--muted);font-size:12px}
+.gate-body{flex:1 1 auto;min-width:0}
+.gate-action{
+  display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;margin-top:8px;padding:8px 10px;
+  border-radius:6px;background:rgba(255,255,255,.7);border:1px dashed #e2b4b4;font-size:12.5px;color:var(--ink);
+}
+.gate-action .k{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--bad);font-weight:700}
+.gate-action .owner{margin-left:auto;font-weight:600;color:var(--brand)}
+.roles{
+  display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px;padding:10px 14px;
+  border:1px solid var(--line);border-radius:var(--radius);background:#fff;font-size:13px;
+}
+.roles .k{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.roles .role{display:flex;flex-direction:column;gap:1px;font-weight:600;color:var(--brand)}
+.roles .role small{font-weight:400;color:var(--muted);font-size:11.5px}
+.roles .arr{color:var(--accent);font-weight:700}
 table.gate-check{min-width:0}
 table.gate-check td:first-child{white-space:nowrap;font-weight:700}
 .pill{
@@ -429,16 +444,24 @@ class Demo:
             s3.append(f'<tr><td><code>{_e(code)}</code></td><td>{_e(rule)}</td><td>{status}</td></tr>')
         s3.append("</table></div>")
         if viol:
-            s3.append('<h2 class="results-h">위반 상세</h2><div class="gate-list">')
+            s3.append('<h2 class="results-h">위반 상세 · 권고 조치</h2><div class="gate-list">')
             for v in viol:
                 s3.append(
                     f'<div class="gate"><span class="gate-code"><b>{_e(v["코드"])}</b></span>'
-                    f'<div><span class="gate-item">{_e(v["항목ID"] or "(문서)")}</span> · {_e(v["설명"])}'
-                    f'<div class="gate-rule">{_e(v["게이트"])}</div></div></div>'
+                    f'<div class="gate-body"><div><span class="gate-item">{_e(v["항목ID"] or "(문서)")}</span> · {_e(v["설명"])}</div>'
+                    f'<div class="gate-rule">{_e(v["게이트"])}</div>'
+                    f'<div class="gate-action"><span class="k">조치</span>{_e(v.get("조치"))}'
+                    f'<span class="owner">확인 담당 · {_e(v.get("담당"))}</span></div></div></div>'
                 )
             s3.append("</div>")
         else:
             s3.append('<div class="ok">게이트 위반 없음 — 원문 없는 값을 채우지 않았다.</div>')
+        s3.append(
+            '<div class="roles"><span class="k">확정 흐름</span>'
+            '<span class="role">AI 초안 <small>추출·질문 제안 · 확정하지 않음</small></span><span class="arr">→</span>'
+            '<span class="role">현장 담당자 <small>희망일·수령 위치 확인</small></span><span class="arr">→</span>'
+            '<span class="role">본사 구매·지원팀 <small>필수 기준·원문 대조 후 최종 확인</small></span></div>'
+        )
 
         # ── STEP 5. 보완 질문 · 사람 확정 ────────────────────────────
         qs = res.get("보완질문요약", [])
