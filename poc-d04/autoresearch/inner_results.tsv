@@ -17,3 +17,8 @@ experiment	commit	hypothesis	score	error	dom	form	visual	design	decision	notes
 15	ba6e1bb	게이트 코드 배지 16px	100.0	100	100	100	100	100	KEEP	프로젝터 스캔; score 100; guard 44 pass
 16	0d2fa04	성공기준 문장 왼쪽 액센트	100.0	100	100	100	100	100	KEEP	criterion scan; score 100; guard 44 pass
 17	fa66042	미사용 .results/.jump CSS 삭제	100.0	100	100	100	100	100	KEEP	simplicity same metric; score 100; guard 44 pass
+18	fbe5f9c	지시↔결과 대조 체크리스트 (PDF p5) — 5개 게이트 전부 통과/위반	100.0	100	100	100	100	100	KEEP	round5 gate features; score 100; guard 44 pass
+19	e8c27a1	위반별 권고 조치·확인 담당 + 3역할 확정 흐름 (PDF p6)	100.0	100	100	100	100	100	KEEP	gate.py GATE_ACTION/OWNER 추가; score 100; guard 44 pass
+20	a865c65	원문 근거 <mark> 하이라이트 + 원문 추적 비율 칩 (PDF p8·p13)	100.0	100	100	100	100	100	KEEP	/bad 3/6·50% 추적; score 100; guard 44 pass
+21	94a07d2	G6 범위 밖 행위 — load_pasted 범위밖 보존, 실패 장면에 공급사 최저가 추가 (PDF p9)	100.0	100	100	100	100	100	KEEP	규칙 백엔드 위반 0 유지; score 100; guard 45 pass (G6 테스트 추가)
+22	d486697	판정 배너 계속/재시험 (PDF p10 성공·수정·중단)	100.0	100	100	100	100	100	KEEP	server 테스트에 게이트 단계 단언 추가; score 100; guard 45 pass
