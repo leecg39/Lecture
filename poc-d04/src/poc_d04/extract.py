@@ -283,6 +283,7 @@ def load_pasted(obj: dict | list | str, text: str, doc_id: str | None = None) ->
     by_field: dict[str, dict] = {}
     extra: dict = {}
     warnings: list[str] = []
+    out_of_scope: list[dict] = []  # 필수 항목표 밖의 키 — 버리지 않고 남겨 게이트(G6)가 본다
     for r in raw_items:
         if not isinstance(r, dict):
             continue
@@ -290,6 +291,9 @@ def load_pasted(obj: dict | list | str, text: str, doc_id: str | None = None) ->
         fid = r.get("항목ID")
         fid = _NAME_TO_ID.get(str(fid).replace(" ", ""), _NAME_TO_ID.get(fid, fid))
         if fid not in FIELD_ORDER:
+            if fid not in (None, ""):
+                out_of_scope.append({"키": str(fid), "값": r.get("원문값"), "메모": r.get("메모")})
+                warnings.append(f"필수 항목표 밖의 항목 '{fid}' — 표에 넣지 않음")
             continue
         if fid in by_field:
             warnings.append(f"{FIELD_NAMES[fid]} 항목이 중복 출력됨 — 뒤의 값 사용")
@@ -334,6 +338,13 @@ def load_pasted(obj: dict | list | str, text: str, doc_id: str | None = None) ->
         for k in ("사람확정", "확정", "사람 확정", "최종확정"):
             if obj.get(k) not in (None, ""):
                 extra["사람확정"] = obj[k]
+        known = {"문서ID", "항목", "사람확정", "확정", "사람 확정", "최종확정"}
+        for k, v in obj.items():
+            if k not in known and v not in (None, ""):
+                out_of_scope.append({"키": str(k), "값": v if isinstance(v, (str, int, float)) else json.dumps(v, ensure_ascii=False), "메모": None})
+                warnings.append(f"문서 수준의 항목표 밖 키 '{k}' — 표에 넣지 않음")
+    if out_of_scope:
+        extra["범위밖"] = out_of_scope
     return {"문서ID": doc_id or (obj.get("문서ID") if isinstance(obj, dict) else None),
             "백엔드": "paste", "항목": [by_field[f] for f in FIELD_ORDER], "경고": warnings, **extra}
 

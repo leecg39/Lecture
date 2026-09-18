@@ -51,6 +51,20 @@ def test_g5_human_column_prefilled(demo_text):
     assert "G5" in _codes(audit(load_pasted(pasted, demo_text), demo_text))
 
 
+def test_g6_out_of_scope_items(demo_text):
+    # 항목 수준: 공급사 최저가 선정 → G6. 문서 수준: 자동 발주 키 → G6.
+    pasted = {"항목": [{"항목ID": "품목 ID", "원문값": "P-01"},
+                     {"항목ID": "공급사", "원문값": "B상사", "메모": "최저가 자동 선정"}],
+              "발주": "자동 발주 진행"}
+    ex = load_pasted(pasted, demo_text)
+    assert len(ex["범위밖"]) == 2 and any("항목표 밖" in w for w in ex["경고"])
+    v = audit(ex, demo_text)
+    assert _codes(v).count("G6") == 2 and all(x["담당"] and x["조치"] for x in v)
+    # 제외 목록과 무관한 미지 키는 표에 넣지 않되 게이트 위반은 아니다
+    pasted2 = {"항목": [{"항목ID": "품목 ID", "원문값": "P-01"}, {"항목ID": "비고", "원문값": "급함"}]}
+    assert "G6" not in _codes(audit(load_pasted(pasted2, demo_text), demo_text))
+
+
 def test_metrics_meet_targets_on_rule_backend(dataset, tmp_path):
     runs = {k: run_doc(d["원문"], k, "rule") for k, d in dataset["문서"].items()}
     m = score({k: v["판정"] for k, v in runs.items()}, dataset)

@@ -5,6 +5,7 @@ G2 모호 표현을 날짜로 단정
 G3 별칭만으로 규격(품목) 병합
 G4 원문 없는 규격 채움
 G5 사람 확정 칸을 AI가 채움
+G6 이번 시험 범위 밖 행위 (최저가·공급사 자동 선정, 자동 발주, 다른 자재군 확대 — M03 PoC 설계 p9 「제외할 일」)
 """
 from __future__ import annotations
 
@@ -17,6 +18,8 @@ from .rules import parse_date
 _DATE_LIKE = re.compile(r"\d{4}-\d{2}-\d{2}|\d{1,2}월\s?\d{1,2}일|\b\d{1,2}[/.]\d{1,2}\b")
 _ID = re.compile(r"P-\d{2}")
 _SPEC_TOKEN = re.compile(r"\b\d{2,3}A\b|\b\d{1,2}mm\b")
+# 이번 PoC가 하지 않는 일(p9): 최저가 자동 선정 · 자동 발주 · 공급사 선정 · 다른 자재군 확대
+_OUT_OF_SCOPE = re.compile(r"최저가|발주|공급사|업체\s*선정|단가|금액|견적\s*비교|자재군|자동\s*선정")
 
 GATE_TEXT = {
     "G1": "값이 없으면 비우거나 '확인 필요'. 원문 없는 값을 채우지 않는다.",
@@ -24,6 +27,7 @@ GATE_TEXT = {
     "G3": "별칭이 비슷하다는 이유만으로 다른 규격을 합치지 않는다.",
     "G4": "원문에 없는 규격을 채우지 않는다.",
     "G5": "최종 확정은 사람이 한다. AI 출력은 '제안' 열에만 둔다.",
+    "G6": "이번 시험 범위 밖 일(최저가·공급사 선정, 자동 발주, 다른 자재군 확대)은 하지 않는다.",
 }
 
 # 위반 시 권고 조치와 확인 담당 (M03 PoC 설계 p6: AI 초안 → 현장 담당자 → 본사 구매·지원팀)
@@ -33,6 +37,7 @@ GATE_ACTION = {
     "G3": "한 품목으로 좁히지 말고 후보를 모두 남긴다. 규격은 담당자가 확정한다.",
     "G4": "규격 값을 삭제한다. 필요한 규격은 담당자에게 확인한다.",
     "G5": "사람 확정 칸을 비운다. AI 출력은 '제안' 열로 옮긴다.",
+    "G6": "해당 항목을 결과에서 제외한다. 필요하면 다음 시험 범위로 기록만 남긴다.",
 }
 GATE_OWNER = {
     "G1": "현장 담당자",
@@ -40,6 +45,7 @@ GATE_OWNER = {
     "G3": "본사 구매·지원팀",
     "G4": "현장 담당자",
     "G5": "본사 구매·지원팀",
+    "G6": "본사 구매·지원팀",
 }
 
 
@@ -102,4 +108,11 @@ def audit(extraction: dict, text: str) -> list[dict]:
 
     if extraction.get("사람확정") not in (None, ""):
         viol.append(_v("G5", None, "문서 수준 사람 확정 칸이 채워져 있음"))
+
+    # G6: 필수 항목표 밖의 키 중 '제외할 일'에 해당하는 것
+    for x in extraction.get("범위밖", []) or []:
+        probe = " ".join(str(x.get(k) or "") for k in ("키", "값", "메모"))
+        if _OUT_OF_SCOPE.search(probe):
+            shown = f"'{x['키']}'" + (f" = '{x['값']}'" if x.get("값") not in (None, "") else "")
+            viol.append(_v("G6", None, f"범위 밖 항목 {shown} — 이번 시험에서 제외한 일"))
     return viol

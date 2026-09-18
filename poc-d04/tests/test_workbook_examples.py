@@ -33,7 +33,7 @@ def test_examples_bad_draft_hits_four_gates(tmp_path):
     build_dataset(data)
     paths = write_all(data, tmp_path / "ex")
     md = (tmp_path / "ex" / "D04_잘못된초안_예시.md").read_text(encoding="utf-8")
-    for code in ("G1", "G2", "G4", "G5"):
+    for code in ("G1", "G2", "G4", "G5", "G6"):
         assert f"| {code} |" in md
     cap = tmp_path / "ex" / "D04_오프라인_추출결과"
     assert (cap / "README.md").exists() and len(list(cap.glob("*조_*.md"))) == 6
