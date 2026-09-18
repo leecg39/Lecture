@@ -31,6 +31,7 @@ CSS = """
   color-scheme:light;
 }
 *{box-sizing:border-box}
+html{scroll-padding-top:56px}
 body{
   margin:0; min-height:100vh; color:var(--ink);
   font-family:'IBM Plex Sans KR',system-ui,sans-serif;
