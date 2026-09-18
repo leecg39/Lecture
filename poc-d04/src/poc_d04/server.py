@@ -151,6 +151,20 @@ code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.92em}
   font-size:16px;padding:6px 10px;border-radius:6px;background:#fff;border:1px solid #e2b4b4;color:var(--bad);
 }
 .gate-rule{margin-top:4px;color:var(--muted);font-size:12px}
+.verdict{
+  display:flex;gap:14px;align-items:flex-start;margin:0 0 12px;padding:14px 16px;
+  border-radius:var(--radius);border:1px solid transparent;font-size:15px;line-height:1.5;box-shadow:var(--shadow);
+}
+.verdict .vk{
+  flex:0 0 auto;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;font-weight:700;padding:4px 8px;border-radius:6px;background:#fff;margin-top:2px;
+}
+.verdict b{font-size:17px;letter-spacing:-.01em}
+.verdict small{display:block;margin-top:4px;font-size:12.5px;opacity:.85}
+.verdict.bad{background:var(--bad-bg);border-color:#e2b4b4;color:var(--bad);border-left:5px solid var(--bad)}
+.verdict.bad .vk{color:var(--bad);border:1px solid #e2b4b4}
+.verdict.ok{background:var(--ok-bg);border-color:#b7d7c5;color:var(--ok);border-left:5px solid var(--ok)}
+.verdict.ok .vk{color:var(--ok);border:1px solid #b7d7c5}
 .source{border:1px solid var(--line);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow);overflow:hidden}
 .source-text{
   margin:0;padding:16px 18px;background:#fff;color:var(--ink);white-space:pre-wrap;word-break:break-word;
@@ -475,7 +489,22 @@ class Demo:
         trace_pct = f"{traced / valued * 100:.0f}%" if valued else "해당 없음"
         untraced = [it["항목명"] for it in ex_items
                     if it.get("원문값") is not None and it.get("원문시작") is None]
+        owners = sorted({v["담당"] for v in viol if v.get("담당")})
+        if viol:
+            verdict = (
+                '<div class="verdict bad"><span class="vk">판정</span><div>'
+                f'<b>재시험</b> — 게이트 위반 {len(viol)}건. 원문 없는 값을 삭제하고 '
+                f'{_e(" · ".join(owners)) or "담당자"}에게 확인한 뒤 다시 검사한다.'
+                '<small>중요 오류가 있으면 결과를 사람 확정으로 넘기지 않는다 (성공·수정·중단 기준).</small></div></div>'
+            )
+        else:
+            verdict = (
+                '<div class="verdict ok"><span class="vk">판정</span><div>'
+                '<b>계속</b> — 게이트 위반 0건. 규칙 검사 결과를 그대로 사람 확정 단계로 넘긴다.'
+                '<small>AI 초안은 제안일 뿐이며 확정은 다음 단계에서 사람이 한다.</small></div></div>'
+            )
         s3 = [
+            verdict,
             '<div class="summary-strip">',
             f'<div class="chip {"bad" if viol else "good"}"><span class="k">게이트</span><span class="v">{len(viol)}건 위반</span></div>',
             f'<div class="chip {"good" if not viol else ""}"><span class="k">지시 대조</span>'
@@ -550,7 +579,7 @@ class Demo:
         return (
             self._step(1, "추출", f"원문에서 값을 뽑는다. 백엔드 <code>{_e(backend)}</code> · 원문에 없는 값은 만들지 않는다.", s1)
             + self._step(2, "규칙 검사 → 누락 표시표", "뽑은 값에 규칙을 적용해 빈칸·모호 표현을 표시한다. 마지막 열은 사람이 채운다.", s2)
-            + self._step(3, "게이트 감사", "AI가 원문 없는 값을 채웠는지, 사람 확정 칸을 건드렸는지 검사한다.", s3)
+            + self._step(3, "게이트 감사", "AI에 준 지시와 결과를 대조한다 — 원문 없는 값, 모호 표현 단정, 사람 확정 칸 선점, 범위 밖 일. 위반은 조치·담당과 함께 표시한다.", s3)
             + self._step(4, "보완 질문 · 사람 확정", "확인이 필요한 항목마다 요청자에게 보낼 질문 초안을 만든다.", s4)
         )
 
