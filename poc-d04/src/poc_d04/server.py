@@ -15,6 +15,7 @@ from pathlib import Path
 
 from .data_gen import load_dataset
 from .evaluate import score
+from .gate import GATE_TEXT
 from .pipeline import run_doc
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -150,6 +151,14 @@ code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.92em}
   font-size:16px;padding:6px 10px;border-radius:6px;background:#fff;border:1px solid #e2b4b4;color:var(--bad);
 }
 .gate-rule{margin-top:4px;color:var(--muted);font-size:12px}
+table.gate-check{min-width:0}
+table.gate-check td:first-child{white-space:nowrap;font-weight:700}
+.pill{
+  display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;
+  border:1px solid transparent;white-space:nowrap;
+}
+.pill.ok{background:var(--ok-bg);color:var(--ok);border-color:#b7d7c5}
+.pill.bad{background:var(--bad-bg);color:var(--bad);border-color:#e2b4b4}
 .qlist{margin:0;padding-left:1.2rem;line-height:1.55}
 .json-box{margin-top:18px;border:1px solid var(--line);border-radius:var(--radius);background:#fff;padding:8px 12px}
 .json-box summary{cursor:pointer;font-weight:600;color:var(--brand)}
@@ -401,13 +410,26 @@ class Demo:
         s2.append(f'<p class="meta"><b>확인 필요 항목:</b> {_e(", ".join(need) or "없음")}</p>')
 
         # ── STEP 4. 게이트 감사 ───────────────────────────────────────
+        by_code: dict[str, list[dict]] = {}
+        for v in viol:
+            by_code.setdefault(v["코드"], []).append(v)
         s3 = [
             '<div class="summary-strip">',
             f'<div class="chip {"bad" if viol else "good"}"><span class="k">게이트</span><span class="v">{len(viol)}건 위반</span></div>',
+            f'<div class="chip {"good" if not viol else ""}"><span class="k">지시 대조</span>'
+            f'<span class="v">{len(GATE_TEXT) - len(by_code)} / {len(GATE_TEXT)} 통과</span></div>',
             "</div>",
+            '<h2 class="results-h">지시 ↔ 결과 대조</h2>',
+            '<div class="table-wrap"><table class="gate-check"><tr><th>코드</th><th>AI에 준 지시</th><th>결과</th></tr>',
         ]
+        for code, rule in GATE_TEXT.items():
+            hits = by_code.get(code, [])
+            status = (f'<span class="pill bad">위반 {len(hits)}건</span>' if hits
+                      else '<span class="pill ok">통과</span>')
+            s3.append(f'<tr><td><code>{_e(code)}</code></td><td>{_e(rule)}</td><td>{status}</td></tr>')
+        s3.append("</table></div>")
         if viol:
-            s3.append('<div class="gate-list">')
+            s3.append('<h2 class="results-h">위반 상세</h2><div class="gate-list">')
             for v in viol:
                 s3.append(
                     f'<div class="gate"><span class="gate-code"><b>{_e(v["코드"])}</b></span>'
