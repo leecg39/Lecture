@@ -155,10 +155,10 @@ code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.92em}
   border-radius:var(--radius);border:1px solid transparent;font-size:15px;line-height:1.5;box-shadow:var(--shadow);
 }
 .verdict .vk{
-  flex:0 0 auto;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.08em;
+  flex:0 0 auto;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:13px;letter-spacing:.08em;
   text-transform:uppercase;font-weight:700;padding:4px 8px;border-radius:6px;background:#fff;margin-top:2px;
 }
-.verdict b{font-size:17px;letter-spacing:-.01em}
+.verdict b{font-size:20px;letter-spacing:-.01em}
 .verdict small{display:block;margin-top:4px;font-size:12.5px;opacity:.85}
 .verdict.bad{background:var(--bad-bg);border-color:#e2b4b4;color:var(--bad);border-left:5px solid var(--bad)}
 .verdict.bad .vk{color:var(--bad);border:1px solid #e2b4b4}
