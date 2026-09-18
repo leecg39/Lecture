@@ -58,8 +58,8 @@ body{
 .hero .lede{margin:0;max-width:52ch;color:rgba(246,243,236,.88);font-size:17px;line-height:1.55}
 .criterion{
   display:inline-flex;gap:8px;align-items:flex-start;margin-top:4px;
-  padding:12px 14px;border-radius:8px;background:rgba(0,0,0,.18);
-  font-size:15px;line-height:1.45;
+  padding:12px 14px 12px 16px;border-radius:8px;background:rgba(0,0,0,.18);
+  font-size:15px;line-height:1.45; border-left:4px solid #ffd79a;
 }
 .criterion strong{color:#ffd79a}
 .toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:18px 0 8px}
