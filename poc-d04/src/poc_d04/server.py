@@ -151,6 +151,22 @@ code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.92em}
   font-size:16px;padding:6px 10px;border-radius:6px;background:#fff;border:1px solid #e2b4b4;color:var(--bad);
 }
 .gate-rule{margin-top:4px;color:var(--muted);font-size:12px}
+.source{border:1px solid var(--line);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow);overflow:hidden}
+.source-text{
+  margin:0;padding:16px 18px;background:#fff;color:var(--ink);white-space:pre-wrap;word-break:break-word;
+  font-family:'IBM Plex Sans KR',system-ui,sans-serif;font-size:16px;line-height:2;border-radius:0;
+}
+.source-text mark{
+  position:relative;background:#e4f2ea;color:var(--ok);padding:2px 4px;border-radius:4px;
+  box-shadow:inset 0 -2px 0 var(--ok);font-weight:600;
+}
+.source-text mark .tag{
+  position:absolute;left:0;top:-13px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9.5px;
+  line-height:1;color:var(--ok);font-weight:600;letter-spacing:.02em;white-space:nowrap;
+}
+.source-miss,.source-ok{padding:9px 14px;font-size:13px;border-top:1px solid var(--line)}
+.source-miss{background:var(--bad-bg);color:var(--bad)}
+.source-ok{background:var(--ok-bg);color:var(--ok)}
 .gate-body{flex:1 1 auto;min-width:0}
 .gate-action{
   display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;margin-top:8px;padding:8px 10px;
@@ -331,6 +347,33 @@ def _e(x) -> str:
     return html.escape("" if x is None else str(x))
 
 
+def _highlight(text: str, items: list[dict]) -> tuple[str, int, int]:
+    """원문에 추출 위치를 <mark>로 표시. (HTML, 위치 있는 값 수, 값 있는 항목 수)를 돌려준다.
+
+    겹치는 구간은 앞선 것만 표시한다(값을 고치지 않고 보여 주기만 한다).
+    """
+    spans = []
+    valued = traced = 0
+    for it in items:
+        if it.get("원문값") is None:
+            continue
+        valued += 1
+        s, e = it.get("원문시작"), it.get("원문끝")
+        if isinstance(s, int) and isinstance(e, int) and 0 <= s < e <= len(text):
+            traced += 1
+            spans.append((s, e, it.get("항목명") or it.get("항목ID") or ""))
+    spans.sort()
+    out, pos = [], 0
+    for s, e, name in spans:
+        if s < pos:
+            continue
+        out.append(_e(text[pos:s]))
+        out.append(f'<mark title="{_e(name)}">{_e(text[s:e])}<span class="tag">{_e(name)}</span></mark>')
+        pos = e
+    out.append(_e(text[pos:]))
+    return "".join(out), traced, valued
+
+
 class Demo:
     def __init__(self, data_dir: Path = DATA):
         self.ds = load_dataset(data_dir) if (data_dir / "D04_원문위치_정답표.json").exists() else {"문서": {}, "정답": []}
@@ -428,12 +471,23 @@ class Demo:
         by_code: dict[str, list[dict]] = {}
         for v in viol:
             by_code.setdefault(v["코드"], []).append(v)
+        marked, traced, valued = _highlight(text, ex_items)
+        trace_pct = f"{traced / valued * 100:.0f}%" if valued else "해당 없음"
+        untraced = [it["항목명"] for it in ex_items
+                    if it.get("원문값") is not None and it.get("원문시작") is None]
         s3 = [
             '<div class="summary-strip">',
             f'<div class="chip {"bad" if viol else "good"}"><span class="k">게이트</span><span class="v">{len(viol)}건 위반</span></div>',
             f'<div class="chip {"good" if not viol else ""}"><span class="k">지시 대조</span>'
             f'<span class="v">{len(GATE_TEXT) - len(by_code)} / {len(GATE_TEXT)} 통과</span></div>',
+            f'<div class="chip {"good" if valued and traced == valued else "bad"}"><span class="k">원문 추적</span>'
+            f'<span class="v">{traced} / {valued} · {trace_pct}</span></div>',
             "</div>",
+            '<h2 class="results-h">원문 근거</h2>',
+            f'<div class="source"><pre class="source-text">{marked}</pre>'
+            + (f'<div class="source-miss">원문에서 위치를 찾지 못한 값: <b>{_e(", ".join(untraced))}</b></div>' if untraced
+               else '<div class="source-ok">값이 있는 항목 모두 원문 위치가 있다.</div>')
+            + "</div>",
             '<h2 class="results-h">지시 ↔ 결과 대조</h2>',
             '<div class="table-wrap"><table class="gate-check"><tr><th>코드</th><th>AI에 준 지시</th><th>결과</th></tr>',
         ]
