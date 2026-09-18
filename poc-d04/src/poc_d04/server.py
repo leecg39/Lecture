@@ -96,8 +96,6 @@ button,.btn{
 }
 button:hover,.btn:hover{background:var(--brand-2)}
 a.linkish{color:var(--brand-2);font-weight:500;font-size:14px;margin-left:4px}
-.results{margin-top:28px}
-.results h2{margin:22px 0 10px;font-size:16px;font-weight:600}
 .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow)}
 table{border-collapse:collapse;width:100%;font-size:15px;min-width:920px}
 th,td{border-bottom:1px solid #e6e1d7;padding:11px 12px;vertical-align:top;text-align:left}
@@ -156,7 +154,6 @@ code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.92em}
 .json-box{margin-top:18px;border:1px solid var(--line);border-radius:var(--radius);background:#fff;padding:8px 12px}
 .json-box summary{cursor:pointer;font-weight:600;color:var(--brand)}
 .json-box pre{margin:10px 0 4px}
-a.jump{margin-left:auto;font-size:13px;color:var(--brand-2);font-weight:600}
 /* 단계 진행 UI */
 .stepper{
   display:flex;flex-wrap:wrap;gap:6px;margin:18px 0 14px;padding:8px 0;
