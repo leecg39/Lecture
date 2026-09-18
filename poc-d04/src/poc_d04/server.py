@@ -96,7 +96,6 @@ button,.btn{
   text-decoration:none; box-shadow:0 1px 0 rgba(255,255,255,.15) inset;
 }
 button:hover,.btn:hover{background:var(--brand-2)}
-a.linkish{color:var(--brand-2);font-weight:500;font-size:14px;margin-left:4px}
 .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow)}
 table{border-collapse:collapse;width:100%;font-size:15px;min-width:920px}
 th,td{border-bottom:1px solid #e6e1d7;padding:11px 12px;vertical-align:top;text-align:left}
@@ -233,7 +232,6 @@ table.gate-check td:first-child{white-space:nowrap;font-weight:700}
 .stepper li.done{color:var(--brand);border-color:#b7d7c5}
 .stepper li.done .n{background:var(--ok-bg);color:var(--ok)}
 .stepper li.locked{opacity:.45;cursor:not-allowed}
-.stepper li .arrow{color:var(--line);margin:0 2px;font-size:12px}
 .step[hidden]{display:none}
 .step-title{display:flex;align-items:baseline;gap:10px;margin:0 0 6px}
 .step-title .k{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--accent);font-weight:600;letter-spacing:.06em}
