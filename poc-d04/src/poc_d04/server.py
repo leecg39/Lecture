@@ -250,8 +250,8 @@ button.ghost,a.btn.ghost{background:transparent;color:var(--brand);border:1px so
 button.ghost:hover,a.btn.ghost:hover{background:#fff}
 button:disabled,button:disabled:hover{opacity:.4;cursor:not-allowed;background:var(--brand)}
 button.ghost:disabled,button.ghost:disabled:hover{background:transparent}
-.kbd-hint{color:var(--muted);font-size:12px}
-.kbd-hint kbd{font-family:'IBM Plex Mono',ui-monospace,monospace;border:1px solid var(--line);border-radius:4px;padding:0 5px;background:#fff}
+.kbd-hint{color:var(--muted);font-size:14px}
+.kbd-hint kbd{font-family:'IBM Plex Mono',ui-monospace,monospace;border:1px solid var(--line);border-radius:4px;padding:1px 7px;background:#fff;font-size:13px}
 """
 
 PAGE = """<!doctype html><html lang="ko"><head>
