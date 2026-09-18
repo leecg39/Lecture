@@ -149,7 +149,7 @@ code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.92em}
 .gate{display:flex;gap:12px;align-items:flex-start}
 .gate-code{
   flex:0 0 auto;font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:700;
-  font-size:13px;padding:4px 8px;border-radius:6px;background:#fff;border:1px solid #e2b4b4;color:var(--bad);
+  font-size:16px;padding:6px 10px;border-radius:6px;background:#fff;border:1px solid #e2b4b4;color:var(--bad);
 }
 .gate-rule{margin-top:4px;color:var(--muted);font-size:12px}
 .qlist{margin:0;padding-left:1.2rem;line-height:1.55}
