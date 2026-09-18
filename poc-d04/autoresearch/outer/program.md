@@ -59,6 +59,29 @@ Frozen Metric이 실험 1에서 100으로 포화됨. 이후 실험은:
 재실행 Inner 13–17 KEEP·100 (scroll-padding, sticky nav, gate-code, criterion accent, dead CSS).
 변별력 없음. 다음 재실행은 회귀가 아니면 no-op로 기록하고 중단한다.
 
+## Outer update (round 5) — 사람 지시: 게이트 감사 단계 기능 확장
+근거 자료: `outputs/03_PoC설계_실사형/03_PoC설계_건설현장_실사형.pdf` (M03 PoC 설계, 16장).
+UI 크롬은 동결 유지. 이번 라운드는 **STEP 4 게이트 감사**에 강의안이 요구하는 기능을 넣는다.
+
+Target 확장 (이번 라운드만):
+- `src/poc_d04/server.py` — STEP 4 마크업·CSS
+- `src/poc_d04/gate.py` — 게이트 메타데이터(조치·담당) 및 새 게이트 G6 (기존 G1–G5 판정 로직은 유지)
+- `src/poc_d04/extract.py` — `load_pasted`가 범위 밖 키를 버리지 않고 `범위밖` 목록으로 남기는 것만
+- `src/poc_d04/examples.py` — 실패 장면 초안에 범위 밖 항목 1건 추가 (G6 시연용)
+
+강의안 → 기능 매핑:
+| PDF | 기능 |
+|---|---|
+| p5 시연03 「지시와 결과 대조」 | 5개 게이트 전부를 지시 ↔ 결과 체크리스트로 표시(통과·위반) |
+| p6 「AI 초안 → 현장 담당자 → 본사 구매·지원팀」, 오류 찾기 예시 | 위반별 권고 조치 + 확인 담당 |
+| p8 「원문 근거: 값이 나온 문장·행을 찾을 수 있음」, p13 「원문 추적 비율 100%」 | 원문 하이라이트 + 원문 추적 비율 칩 |
+| p9 「이번에 제외할 일」 | G6 범위 밖 행위(규격 임의 추정·최저가 선정·자동 발주·자재군 확대) |
+| p10 「성공·수정·중단 — 중요 오류 시 재시험」 | 판정 배너: 계속 / 재시험 |
+
+불변: `eval/`, `meta_eval/`, 정답표·데이터, 사람 확정 칸 공란, 규칙 백엔드는 게이트 위반 0.
+Guard: pytest 전체 통과. Frozen Metric 100 유지(회귀 감지용).
+Bounded: Inner 18–22.
+
 ## Dev server
 ```
 cd poc-d04 && PYTHONPATH=src .venv/bin/python -m poc_d04 serve
