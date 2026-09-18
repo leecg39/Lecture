@@ -174,7 +174,7 @@ code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.92em}
   box-shadow:inset 0 -2px 0 var(--ok);font-weight:600;
 }
 .source-text mark .tag{
-  position:absolute;left:0;top:-13px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9.5px;
+  position:absolute;left:0;top:-15px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;
   line-height:1;color:var(--ok);font-weight:600;letter-spacing:.02em;white-space:nowrap;
 }
 .source-miss,.source-ok{padding:9px 14px;font-size:13px;border-top:1px solid var(--line)}
